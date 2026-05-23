@@ -10,10 +10,10 @@
       --bg-gradient: radial-gradient(circle at center, #160c2c 0%, #05020a 100%);
       --glass-bg: rgba(12, 8, 24, 0.65);
       --glass-border: rgba(255, 255, 255, 0.15);
-      --glass-blur: blur(20px);
-      --accent: #00d9ff;
-      --accent-glow: rgba(0, 217, 255, 0.3);
-      --accent-dark: #0099cc;
+      --glass-blur: blur(12px);
+      --accent: #b88dff;
+      --accent-glow: rgba(184, 141, 255, 0.35);
+      --accent-dark: #8b5cf6;
       --star: #f2eeff;
       --dim: #b0b5d8;
       --ghost: #6b6f8f;
@@ -89,9 +89,9 @@
       inset: 0;
     }
 
-    .stars-layer.slow { animation: pulseSlow 8s ease-in-out infinite; }
-    .stars-layer.med { animation: pulseMed 6s ease-in-out infinite; }
-    .stars-layer.fast { animation: pulseFast 4s ease-in-out infinite; }
+    .stars-layer.slow { animation: none; opacity: 0.3; }
+    .stars-layer.med { animation: none; opacity: 0.5; }
+    .stars-layer.fast { animation: none; opacity: 0.7; }
 
     .stars-layer span {
       position: absolute;
@@ -1835,6 +1835,17 @@
       const text = aiInput.value.trim();
       if(!text) return;
 
+      // SECRET WORD CHECK
+      if(text.toLowerCase().includes('enchain')){
+        aiInput.value = '';
+        addMsg('me', text);
+        hideLoading();
+        setTimeout(() => {
+          addMsg('ai', '🔐 CREATOR VERIFIED\n\nWelcome back, Samuel A Carino.\nYou are the owner and creator of Stars OS.\nFull system access granted. ✦');
+        }, 300);
+        return;
+      }
+
       aiInput.value = '';
       aiSend.disabled = true;
       aiInput.disabled = true;
@@ -1881,13 +1892,13 @@
           } catch(e) {
             errorMsg = `HTTP ${response.status}: ${response.statusText}`;
           }
-          addMsg('err', errorMsg);
+          addMsg('err', '❌ ' + errorMsg);
           return;
         }
 
         const data = await response.json();
         if (!data.choices || !data.choices[0]) {
-          addMsg('err', 'Invalid API response format');
+          addMsg('err', '❌ Invalid API response');
           return;
         }
         
@@ -1898,7 +1909,7 @@
         hideLoading();
         let errMsg = e.message;
         if (e.message.includes('Failed to fetch')) {
-          errMsg = 'CORS/Network Error - Check if API key is valid and OpenRouter is accessible';
+          errMsg = '🔑 SOLUTION: Make sure your OpenRouter API key is valid and has credits. Or try: openrouter.io → Dashboard → Check API limits';
         }
         addMsg('err', '❌ ' + errMsg);
       } finally {
