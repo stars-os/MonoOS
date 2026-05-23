@@ -3,28 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stars OS Pro</title>
+  <title>Stars OS</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-gradient: radial-gradient(circle at center, #160c2c 0%, #05020a 100%);
-      --glass-bg: rgba(12, 8, 24, 0.65);
-      --glass-border: rgba(255, 255, 255, 0.15);
-      --glass-blur: blur(12px);
-      --accent: #b88dff;
-      --accent-glow: rgba(184, 141, 255, 0.35);
-      --accent-dark: #8b5cf6;
-      --star: #f2eeff;
-      --dim: #b0b5d8;
-      --ghost: #6b6f8f;
-      --void: #05020a;
-      --success: #34d399;
-      --warn: #fbbf24;
-      --error: #fb7185;
-      --violet: #a78bfa;
-      --r: 12px;
-      --bar: 52px;
-      --transition: cubic-bezier(0.16, 1, 0.3, 1);
+      --bg-gradient: radial-gradient(circle at center, #1a0f35 0%, #08020f 100%);
+      --glass-bg: rgba(15, 8, 30, 0.75);
+      --glass-border: rgba(200, 150, 255, 0.2);
+      --glass-blur: blur(15px);
+      --accent: #d4a5ff;
+      --accent-glow: rgba(212, 165, 255, 0.4);
+      --accent-dark: #9d6cff;
+      --star: #f5f0ff;
+      --dim: #c8b5e0;
+      --ghost: #7a6b99;
+      --void: #08020f;
+      --success: #8affb3;
+      --error: #ff9db5;
+      --violet: #c4a1ff;
+      --r: 14px;
+      --bar: 54px;
     }
 
     *, *::before, *::after {
@@ -36,6 +34,8 @@
     html, body {
       height: 100%;
       overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     body {
@@ -51,6 +51,11 @@
       border: none;
       background: none;
       color: inherit;
+      transition: all 0.2s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
     }
 
     input, textarea, select {
@@ -67,41 +72,22 @@
     }
 
     ::-webkit-scrollbar-thumb {
-      background: rgba(0, 217, 255, 0.3);
+      background: rgba(212, 165, 255, 0.3);
       border-radius: 10px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 217, 255, 0.5);
+      background: rgba(212, 165, 255, 0.5);
     }
 
-    /* STARFIELD */
-    .stars {
+    /* STARFIELD - Canvas */
+    #starCanvas {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
       z-index: 0;
       pointer-events: none;
-      overflow: hidden;
     }
-
-    .stars-layer {
-      position: absolute;
-      inset: 0;
-    }
-
-    .stars-layer.slow { animation: none; opacity: 0.3; }
-    .stars-layer.med { animation: none; opacity: 0.5; }
-    .stars-layer.fast { animation: none; opacity: 0.7; }
-
-    .stars-layer span {
-      position: absolute;
-      border-radius: 50%;
-      background: #e8eeff;
-    }
-
-    @keyframes pulseSlow { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.7; } }
-    @keyframes pulseMed { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.85; } }
-    @keyframes pulseFast { 0%, 100% { opacity: 0.1; } 50% { opacity: 1; } }
 
     /* BOOT SCREEN */
     #boot {
@@ -118,7 +104,7 @@
     .b-ring {
       width: 80px;
       height: 80px;
-      animation: spin 9s linear infinite;
+      animation: spin 8s linear infinite;
       margin-bottom: 20px;
     }
 
@@ -133,7 +119,7 @@
 
     .b-name span {
       color: var(--accent);
-      text-shadow: 0 0 15px var(--accent-glow);
+      text-shadow: 0 0 20px var(--accent-glow);
     }
 
     .b-ver {
@@ -161,7 +147,8 @@
       background: linear-gradient(90deg, var(--accent), var(--violet));
       border-radius: 2px;
       box-shadow: 0 0 15px var(--accent-glow);
-      transition: transform 12.5s cubic-bezier(0.1, 0.8, 0.25, 1);
+      transition: transform 9s ease;
+      will-change: transform;
     }
 
     .b-msg {
@@ -175,14 +162,14 @@
     }
 
     #boot.hide {
-      animation: bOut .7s ease forwards;
+      animation: bOut .6s ease forwards;
       pointer-events: none;
     }
 
     @keyframes bOut {
       to {
         opacity: 0;
-        transform: scale(1.03);
+        transform: scale(1.02);
       }
     }
 
@@ -192,12 +179,12 @@
       top: 0;
       left: 0;
       right: 0;
-      bottom: 52px;
+      bottom: 54px;
       z-index: 1;
       display: flex;
       flex-direction: column;
       opacity: 0;
-      transition: opacity .7s ease;
+      transition: opacity .5s ease;
     }
 
     #desk.vis {
@@ -217,7 +204,7 @@
       gap: 12px;
       z-index: 100;
       flex-shrink: 0;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent-glow);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
     }
 
     .ml {
@@ -238,7 +225,7 @@
       display: grid;
       place-items: center;
       font-size: .85rem;
-      box-shadow: 0 0 18px var(--accent-glow), 0 4px 12px rgba(0, 0, 0, .4);
+      box-shadow: 0 0 18px var(--accent-glow);
     }
 
     .mtabs {
@@ -257,7 +244,7 @@
       color: var(--dim);
       border-radius: 8px;
       letter-spacing: .01em;
-      transition: all .25s var(--transition);
+      transition: all 0.2s ease;
     }
 
     .mtab:hover {
@@ -281,12 +268,12 @@
       padding: 7px 14px;
       gap: 9px;
       width: 220px;
-      transition: all .25s var(--transition);
+      transition: all 0.2s ease;
     }
 
     .msearch:focus-within {
       border-color: var(--accent);
-      background: rgba(0, 217, 255, 0.08);
+      background: rgba(212, 165, 255, 0.08);
       width: 260px;
       box-shadow: 0 0 20px var(--accent-glow);
     }
@@ -315,7 +302,6 @@
       padding: 8px 18px;
       border-radius: 10px;
       flex-shrink: 0;
-      transition: all .25s var(--transition);
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
@@ -401,10 +387,9 @@
       color: var(--dim);
       width: 100%;
       text-align: left;
-      transition: all .15s;
+      transition: all 0.15s ease;
       position: relative;
       cursor: pointer;
-      border-radius: 0;
     }
 
     .li:hover {
@@ -413,7 +398,7 @@
     }
 
     .li.on {
-      background: rgba(0, 217, 255, 0.1);
+      background: rgba(212, 165, 255, 0.1);
       color: var(--accent);
     }
 
@@ -447,9 +432,9 @@
     }
 
     .li.on .lbadge {
-      background: rgba(0, 217, 255, 0.15);
+      background: rgba(212, 165, 255, 0.15);
       color: var(--accent);
-      border-color: rgba(0, 217, 255, 0.25);
+      border-color: rgba(212, 165, 255, 0.25);
     }
 
     /* WORKSPACE */
@@ -463,7 +448,7 @@
 
     .wpage {
       display: none;
-      animation: pIn .25s ease;
+      animation: pIn .3s ease;
     }
 
     .wpage.show {
@@ -487,7 +472,7 @@
       justify-content: space-between;
       margin-bottom: 18px;
       padding-bottom: 16px;
-      border-bottom: 1px solid rgba(0, 217, 255, 0.15);
+      border-bottom: 1px solid rgba(212, 165, 255, 0.15);
     }
 
     .wtitle {
@@ -520,26 +505,19 @@
     .gc {
       background: rgba(255, 255, 255, 0.03);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(0, 217, 255, 0.15);
+      border: 1px solid rgba(212, 165, 255, 0.15);
       border-radius: 14px;
       overflow: hidden;
       cursor: pointer;
-      transition: transform .25s var(--transition),
-                  box-shadow .25s var(--transition),
-                  border-color .25s var(--transition),
-                  background .25s var(--transition);
-      animation: cIn .3s ease both;
+      animation: cIn .4s ease both;
+      will-change: transform;
     }
 
     .gc:hover {
-      transform: translateY(-8px) scale(1.02);
+      transform: translateY(-8px);
       border-color: var(--accent);
-      background: rgba(0, 217, 255, 0.08);
-      box-shadow: 0 16px 40px var(--accent-glow), 0 8px 20px rgba(0, 0, 0, .6);
-    }
-
-    .gc:active {
-      transform: scale(.96);
+      background: rgba(212, 165, 255, 0.08);
+      box-shadow: 0 16px 40px var(--accent-glow);
     }
 
     @keyframes cIn {
@@ -561,7 +539,7 @@
       font-size: 2.4rem;
       position: relative;
       overflow: hidden;
-      background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(167, 139, 250, 0.1));
+      background: linear-gradient(135deg, rgba(212, 165, 255, 0.1), rgba(196, 161, 255, 0.1));
     }
 
     .gthumb::after {
@@ -618,11 +596,7 @@
       margin-bottom: 14px;
     }
 
-    .empty p {
-      font-size: .92rem;
-    }
-
-    /* GAME WINDOW - DRAGGABLE */
+    /* GAME WINDOW */
     #gwin {
       display: none;
       position: fixed;
@@ -636,29 +610,25 @@
       backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
-      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--accent-glow), 0 0 30px rgba(0, 217, 255, 0.1);
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--accent-glow);
       overflow: hidden;
-      transition: all 0.3s var(--transition);
+      animation: wIn .3s ease;
       user-select: none;
+      will-change: transform;
     }
 
     #gwin.open {
       display: flex;
-      animation: wIn .3s var(--transition);
     }
 
     #gwin.maximized {
       top: 0;
       left: 0;
       width: 100%;
-      height: calc(100vh - 52px);
+      height: calc(100vh - 54px);
       border-radius: 0;
       border: none;
       border-bottom: 1px solid var(--glass-border);
-    }
-
-    #gwin.dragging {
-      opacity: 0.95;
     }
 
     @keyframes wIn {
@@ -682,7 +652,7 @@
       gap: 12px;
       flex-shrink: 0;
       cursor: grab;
-      transition: background .15s;
+      will-change: transform;
     }
 
     .gwbar:active {
@@ -700,7 +670,7 @@
       height: 12px;
       border-radius: 50%;
       cursor: pointer;
-      transition: filter .12s, transform .12s;
+      transition: all 0.12s ease;
     }
 
     .tl:hover {
@@ -728,10 +698,8 @@
       color: var(--accent);
       padding: 5px 12px;
       border-radius: 7px;
-      background: rgba(0, 217, 255, 0.1);
-      border: 1px solid rgba(0, 217, 255, 0.2);
-      cursor: pointer;
-      transition: all .15s;
+      background: rgba(212, 165, 255, 0.1);
+      border: 1px solid rgba(212, 165, 255, 0.2);
       font-weight: 600;
     }
 
@@ -748,8 +716,8 @@
       background: #000;
     }
 
-    /* API KEY SETUP MODAL */
-    #apiModal {
+    /* FREE AI SETUP */
+    #freeAiModal {
       display: none;
       position: fixed;
       inset: 0;
@@ -760,11 +728,11 @@
       justify-content: center;
     }
 
-    #apiModal.open {
+    #freeAiModal.open {
       display: flex;
     }
 
-    .apiBox {
+    .aiBox {
       background: var(--glass-bg);
       backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
@@ -773,27 +741,27 @@
       max-width: 420px;
       width: 90%;
       box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--accent-glow);
-      animation: cIn .3s var(--transition);
+      animation: cIn .3s ease;
     }
 
-    .apiBox h3 {
+    .aiBox h3 {
       font-size: 1.3rem;
       font-weight: 800;
       color: var(--star);
       margin-bottom: 8px;
     }
 
-    .apiBox p {
+    .aiBox p {
       font-size: .9rem;
       color: var(--dim);
       margin-bottom: 18px;
       line-height: 1.6;
     }
 
-    #apiKeyInput {
+    #aiKeyInput {
       width: 100%;
       background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(0, 217, 255, 0.25);
+      border: 1px solid rgba(212, 165, 255, 0.25);
       border-radius: 10px;
       padding: 10px 14px;
       font-size: .85rem;
@@ -804,12 +772,12 @@
       margin-bottom: 14px;
     }
 
-    #apiKeyInput:focus {
+    #aiKeyInput:focus {
       border-color: var(--accent);
       box-shadow: 0 0 16px var(--accent-glow);
     }
 
-    .apiBtn {
+    .aiBtn {
       width: 100%;
       background: var(--accent);
       color: var(--void);
@@ -821,13 +789,13 @@
       cursor: pointer;
     }
 
-    .apiBtn:hover {
+    .aiBtn:hover {
       opacity: .85;
       transform: translateY(-2px);
       box-shadow: 0 8px 20px var(--accent-glow);
     }
 
-    .apiNote {
+    .aiNote {
       font-size: .75rem;
       color: var(--ghost);
       margin-top: 12px;
@@ -848,7 +816,7 @@
       z-index: 700;
       display: flex;
       flex-direction: column;
-      transition: right .35s var(--transition);
+      transition: right .35s ease;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--accent-glow);
     }
 
@@ -910,7 +878,7 @@
     .aix:hover {
       border-color: var(--error);
       color: var(--error);
-      background: rgba(251, 113, 133, 0.1);
+      background: rgba(255, 157, 181, 0.1);
     }
 
     .aimod {
@@ -974,18 +942,18 @@
     }
 
     .msg.me .msg-bub {
-      background: rgba(0, 217, 255, 0.12);
-      border: 1px solid rgba(0, 217, 255, 0.2);
+      background: rgba(212, 165, 255, 0.12);
+      border: 1px solid rgba(212, 165, 255, 0.2);
     }
 
     .msg.ai .msg-bub {
-      background: rgba(52, 211, 153, 0.1);
-      border: 1px solid rgba(52, 211, 153, 0.2);
+      background: rgba(138, 255, 179, 0.1);
+      border: 1px solid rgba(138, 255, 179, 0.2);
     }
 
     .msg.err .msg-bub {
-      background: rgba(251, 113, 133, 0.1);
-      border: 1px solid rgba(251, 113, 133, 0.2);
+      background: rgba(255, 157, 181, 0.1);
+      border: 1px solid rgba(255, 157, 181, 0.2);
       color: var(--error);
     }
 
@@ -1001,7 +969,7 @@
     #aiinput {
       flex: 1;
       background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(0, 217, 255, 0.15);
+      border: 1px solid rgba(212, 165, 255, 0.15);
       border-radius: 9px;
       padding: 9px 12px;
       font-size: .82rem;
@@ -1030,17 +998,12 @@
       font-size: .95rem;
       font-weight: bold;
       flex-shrink: 0;
-      transition: all .15s;
       box-shadow: 0 4px 12px var(--accent-glow);
     }
 
     #aisend:hover:not(:disabled) {
       opacity: .85;
       transform: translateY(-2px);
-    }
-
-    #aisend:active:not(:disabled) {
-      transform: scale(.93);
     }
 
     #aisend:disabled {
@@ -1054,7 +1017,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 52px;
+      height: 54px;
       background: var(--glass-bg);
       backdrop-filter: var(--glass-blur);
       border-top: 1px solid var(--glass-border);
@@ -1097,11 +1060,11 @@
       font-weight: 600;
       color: var(--star);
       cursor: pointer;
-      transition: all 0.2s var(--transition);
+      transition: all 0.2s ease;
     }
 
     .tb-btn:hover {
-      background: rgba(0, 217, 255, 0.1);
+      background: rgba(212, 165, 255, 0.1);
       border-color: var(--accent);
       box-shadow: 0 0 12px var(--accent-glow);
     }
@@ -1123,13 +1086,13 @@
       cursor: pointer;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.06);
-      transition: all 0.2s var(--transition);
+      transition: all 0.2s ease;
       position: relative;
     }
 
     .tb-icon:hover {
       transform: translateY(-4px);
-      background: rgba(0, 217, 255, 0.1);
+      background: rgba(212, 165, 255, 0.1);
       border-color: var(--accent);
       box-shadow: 0 6px 16px var(--accent-glow);
     }
@@ -1188,7 +1151,7 @@
       width: 90%;
       text-align: center;
       box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--accent-glow);
-      animation: cIn .3s var(--transition);
+      animation: cIn .3s ease;
     }
 
     .abox-logo {
@@ -1246,45 +1209,40 @@
       opacity: .85;
       transform: translateY(-2px);
     }
+
+    .free-badge {
+      display: inline-block;
+      background: rgba(138, 255, 179, 0.2);
+      border: 1px solid rgba(138, 255, 179, 0.4);
+      color: var(--success);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- STARFIELD -->
-  <div class="stars" id="stars">
-    <div class="stars-layer slow" id="stars-slow"></div>
-    <div class="stars-layer med" id="stars-med"></div>
-    <div class="stars-layer fast" id="stars-fast"></div>
-  </div>
-
-  <!-- API KEY SETUP MODAL -->
-  <div id="apiModal">
-    <div class="apiBox">
-      <div class="abox-logo">🔑</div>
-      <h3>OpenRouter API Key Required</h3>
-      <p>Enter your OpenRouter API key to enable Stars AI with Claude 3.5 Sonnet.</p>
-      <input type="password" id="apiKeyInput" placeholder="sk-or-..." autocomplete="off">
-      <button class="apiBtn" onclick="saveAPIKey()">Save & Continue</button>
-      <div class="apiNote">
-        <strong>Get your key:</strong> Visit <a href="https://openrouter.ai/workspaces/default/keys" target="_blank" style="color:var(--accent)">openrouter.ai/keys</a><br>
-        Your key is stored locally only. Never shared.
-      </div>
-    </div>
-  </div>
+  <!-- STARFIELD CANVAS -->
+  <canvas id="starCanvas"></canvas>
 
   <!-- BOOT SCREEN -->
   <div id="boot">
     <div class="b-ring">
       <svg viewBox="0 0 80 80" fill="none" width="80" height="80">
-        <circle cx="40" cy="40" r="38" stroke="rgba(0, 217, 255, .15)" stroke-width="1.5"/>
-        <circle cx="40" cy="40" r="27" stroke="rgba(0, 217, 255, .2)" stroke-width="1"/>
+        <circle cx="40" cy="40" r="38" stroke="rgba(212, 165, 255, .15)" stroke-width="1.5"/>
+        <circle cx="40" cy="40" r="27" stroke="rgba(212, 165, 255, .2)" stroke-width="1"/>
         <path d="M40 10 L43.5 33 L66 26 L49 43 L66 61 L43.5 53 L40 70 L36.5 53 L14 61 L31 43 L14 26 L36.5 33 Z"
-              fill="none" stroke="rgba(0, 217, 255, .6)" stroke-width="1.3" stroke-linejoin="round"/>
-        <circle cx="40" cy="40" r="5" fill="rgba(0, 217, 255, .85)"/>
+              fill="none" stroke="rgba(212, 165, 255, .6)" stroke-width="1.3" stroke-linejoin="round"/>
+        <circle cx="40" cy="40" r="5" fill="rgba(212, 165, 255, .85)"/>
       </svg>
     </div>
     <div class="b-name">Stars <span>OS</span></div>
-    <div class="b-ver">VERSION 2.0.0 ENHANCED</div>
+    <div class="b-ver">CREATED BY SAMUEL A CARINO · VERSION 2.0 · FREE & FAST</div>
     <div class="b-track"><div class="b-fill" id="bfill"></div></div>
     <div class="b-msg" id="bmsg">Initializing…</div>
   </div>
@@ -1301,7 +1259,7 @@
         <span style="color:var(--ghost);font-size:.82rem">⌕</span>
         <input type="text" id="searchInput" placeholder="Search games…" autocomplete="off">
       </div>
-      <button class="maibtn" id="aiToggle"><div class="aipulse"></div>AI Chat</button>
+      <button class="maibtn" id="aiToggle"><div class="aipulse"></div>Free AI</button>
       <div class="mclock" id="clock">--:--</div>
       <div class="mcredit" onclick="showAbout()" title="About Stars OS">✦ v2.0</div>
     </div>
@@ -1345,7 +1303,7 @@
     </div>
   </div>
 
-  <!-- GAME WINDOW (DRAGGABLE) -->
+  <!-- GAME WINDOW -->
   <div id="gwin">
     <div class="gwbar">
       <div class="tlg">
@@ -1359,18 +1317,34 @@
     <iframe id="gframe" src="" allowfullscreen allow="fullscreen"></iframe>
   </div>
 
+  <!-- FREE AI SETUP MODAL -->
+  <div id="freeAiModal">
+    <div class="aiBox">
+      <div class="abox-logo">🆓</div>
+      <h3>Free AI Setup</h3>
+      <p>Get your <strong>FREE</strong> Groq API key (no credit card needed) for unlimited Claude AI access!</p>
+      <input type="password" id="aiKeyInput" placeholder="gsk_..." autocomplete="off">
+      <button class="aiBtn" onclick="saveAIKey()">Save & Start Chatting</button>
+      <div class="aiNote">
+        <strong>Get free key:</strong> <a href="https://console.groq.com/keys" target="_blank" style="color:var(--accent)">console.groq.com/keys</a> (No credit card!)<br>
+        Your key is stored locally only. Never shared.<br>
+        <strong>Speed:</strong> Groq's fastest inference engine! ⚡
+      </div>
+    </div>
+  </div>
+
   <!-- AI DRAWER -->
   <div id="aid">
     <div class="aihead">
       <div class="aihead-ic">✦</div>
-      <div class="aihead-info"><strong>Stars AI</strong><span>Claude-Powered</span></div>
+      <div class="aihead-info"><strong>Stars AI</strong><span>Groq-Powered (FREE)</span></div>
       <div class="aix" id="aiClose">✕</div>
     </div>
-    <div class="aimod">🟢 OpenRouter · Claude 3.5 Sonnet</div>
+    <div class="aimod">🟢 Groq API · No Cost · Unlimited</div>
     <div id="aimsgs">
       <div class="msg ai">
         <div class="msg-who">Stars AI</div>
-        <div class="msg-bub">Hello! I'm Stars AI powered by Claude. Ask me about games, tips, or anything else!</div>
+        <div class="msg-bub">Hey! I'm powered by Groq's free API. Ask me anything - no costs, super fast! 🚀</div>
       </div>
     </div>
     <form id="aiform" class="aifooter">
@@ -1398,7 +1372,7 @@
     <div class="tb-right">
       <div class="tb-btn" onclick="document.getElementById('aiToggle').click()">
         <div class="aipulse"></div>
-        <span>AI</span>
+        <span>Free AI</span>
       </div>
       <div class="tb-clock" id="tbclock">--:--</div>
     </div>
@@ -1409,53 +1383,52 @@
     <div class="abox">
       <div class="abox-logo">✦</div>
       <h2>Stars OS Pro</h2>
-      <div class="asub">Unblocked games platform with real Claude AI integration.<br>Version 2.0.0 • Fully Enhanced</div>
+      <div class="free-badge">🆓 100% FREE</div>
+      <div class="asub">Ultimate unblocked gaming platform with free Groq AI.<br>Version 2.0 • Purple Edition • Zero Lag</div>
       <div class="aby">
-        <strong>Features</strong><br>
-        ✦ 200+ Unblocked Games<br>
-        ✦ Draggable Game Windows<br>
-        ✦ Real Claude AI (API)<br>
-        ✦ Beautiful UI Design<br>
-        <strong style="display:block;margin-top:8px">Built with ❤️ for You</strong>
+        <strong>Created by Samuel A Carino</strong><br>
+        ✦ 90+ Unblocked Games<br>
+        ✦ Draggable Windows<br>
+        ✦ Free Groq AI (No Cost!)<br>
+        ✦ Lightning Fast Performance<br>
+        ✦ Beautiful Purple UI<br>
+        <strong style="display:block;margin-top:8px">© 2025 · All Rights Reserved</strong>
       </div>
       <button class="aclose" onclick="document.getElementById('aboutm').classList.remove('open')">Close</button>
     </div>
   </div>
 
   <script>
-    const VERSION = '2.0.0';
-    const CREATOR = 'Samuel A Carino';
+    // ═══════════════════════════════════════════════════════════════
+    // CANVAS STARFIELD - OPTIMIZED FOR PERFORMANCE
+    // ═══════════════════════════════════════════════════════════════
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      drawStars();
+    }
 
-    // ═══════════════════════════════════════════════════════════════
-    // STARFIELD INITIALIZATION
-    // ═══════════════════════════════════════════════════════════════
-    (function(){
-      const slow = document.getElementById('stars-slow');
-      const med = document.getElementById('stars-med');
-      const fast = document.getElementById('stars-fast');
+    function drawStars() {
+      ctx.fillStyle = '#08020f';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      function addStars(container, count, minSize, maxSize) {
-        for(let i = 0; i < count; i++){
-          const s = document.createElement('span');
-          const sz = (Math.random() * (maxSize - minSize) + minSize).toFixed(1);
-          s.style.cssText = `
-            width: ${sz}px;
-            height: ${sz}px;
-            left: ${(Math.random() * 100).toFixed(2)}%;
-            top: ${(Math.random() * 100).toFixed(2)}%;
-            opacity: ${(Math.random() * 0.5 + 0.3).toFixed(2)};
-          `;
-          container.appendChild(s);
-        }
+      ctx.fillStyle = 'rgba(245, 240, 255, 0.7)';
+      for (let i = 0; i < 150; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = Math.random() * 1.5;
+        ctx.fillRect(x, y, size, size);
       }
-      
-      addStars(slow, 20, 0.5, 1.2);
-      addStars(med, 16, 0.9, 1.6);
-      addStars(fast, 10, 1.3, 2.2);
-    })();
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     // ═══════════════════════════════════════════════════════════════
-    // CLOCK & TIME
+    // CLOCK
     // ═══════════════════════════════════════════════════════════════
     function updateClock(){
       const d = new Date();
@@ -1472,16 +1445,12 @@
     // BOOT SEQUENCE
     // ═══════════════════════════════════════════════════════════════
     const BMSGS = [
-      'Initializing quantum kernel…',
-      'Rendering frosted glass UI…',
-      'Initializing draggable windows…',
-      'Loading 200+ game library…',
-      'Connecting to Claude API…',
-      'Mounting bottom taskbar…',
-      'Building search indices…',
+      'Loading game library…',
+      'Initializing AI engine…',
+      'Rendering UI…',
       'Optimizing performance…',
-      'Starting visual effects…',
-      'Launching Stars OS 2.0…',
+      'Connecting systems…',
+      'Ready to launch…',
     ];
 
     (function(){
@@ -1500,7 +1469,7 @@
           msg.textContent = BMSGS[step];
           step++;
         }
-      }, 900);
+      }, 1350);
 
       setTimeout(() => {
         clearInterval(textInterval);
@@ -1508,42 +1477,42 @@
         setTimeout(() => {
           boot.classList.add('hide');
           desk.classList.add('vis');
-          checkAPIKey();
-          setTimeout(() => boot.style.display = 'none', 700);
-        }, 300);
-      }, 10800);
+          checkAIKey();
+          setTimeout(() => boot.style.display = 'none', 600);
+        }, 150);
+      }, 8400);
     })();
 
     // ═══════════════════════════════════════════════════════════════
-    // API KEY MANAGEMENT
+    // FREE AI KEY MANAGEMENT
     // ═══════════════════════════════════════════════════════════════
-    function checkAPIKey() {
-      const key = localStorage.getItem('starsos_api_key');
+    function checkAIKey() {
+      const key = localStorage.getItem('starsos_groq_key');
       if (!key) {
-        document.getElementById('apiModal').classList.add('open');
+        document.getElementById('freeAiModal').classList.add('open');
       }
     }
 
-    function saveAPIKey() {
-      const keyInput = document.getElementById('apiKeyInput');
+    function saveAIKey() {
+      const keyInput = document.getElementById('aiKeyInput');
       const key = keyInput.value.trim();
       
       if (!key) {
-        alert('Please enter an API key');
+        alert('Please enter your Groq API key');
         return;
       }
       
-      if (!key.startsWith('sk-')) {
-        alert('Invalid API key format. OpenRouter keys should start with sk-');
+      if (!key.startsWith('gsk_')) {
+        alert('Invalid key format. Groq keys start with gsk_');
         return;
       }
       
-      localStorage.setItem('starsos_api_key', key);
-      document.getElementById('apiModal').classList.remove('open');
+      localStorage.setItem('starsos_groq_key', key);
+      document.getElementById('freeAiModal').classList.remove('open');
     }
 
-    function getAPIKey() {
-      return localStorage.getItem('starsos_api_key') || '';
+    function getAIKey() {
+      return localStorage.getItem('starsos_groq_key') || '';
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -1554,102 +1523,42 @@
       {t:'1 On 1 Football', u:'https://script.google.com/macros/s/AKfycbwDQPy94m3iDQqxeBLkyAH8rWoNeunk0TyuS7j5qE6hSk3o3j6eoU7z5uy_qhgsKeKn/exec', e:'🏈', tag:'Sports', cat:'sports'},
       {t:'1 On 1 Hockey', u:'https://script.google.com/macros/s/AKfycbyzYs6pQLcgMsjNZ1-YovjUPrruPQtfNcOjaOCMv0KpuRdjd05-u-2owQoardtV62a1/exec', e:'🏒', tag:'Sports', cat:'sports'},
       {t:'1 On 1 Soccer', u:'https://script.google.com/macros/s/AKfycbxJ3oet4bnNqQK_nqPo6KSwPlvIMR448__kEYKx_WN-QbncNc98PEc-qaFme7l2tbKH/exec', e:'⚽', tag:'Sports', cat:'sports'},
-      {t:'1 On 1 Soccer Brazil', u:'https://script.google.com/macros/s/AKfycbxswxjq_hbSYU7FWSj6zgU5GBHGCS_axxnAf6Xu-_yQj_zyINBaEY9HNhE-3N3sBJeO/exec', e:'🇧🇷', tag:'Sports', cat:'sports'},
       {t:'1 On 1 Tennis', u:'https://script.google.com/macros/s/AKfycbwq66mQrL2jfU72rfIYu7h31dGJbSmmvbbkfEF21eOb0WX2UjJyZJq7QHiGEmAMBW2-rQ/exec', e:'🎾', tag:'Sports', cat:'sports'},
-      {t:'1 Will Survive 2', u:'https://script.google.com/macros/s/AKfycbxwE_8QNir8i6xPqvqO99VE9Kw5DGmtvu-IRq4fL4vC1uHFDB0WEo3HG_buBW1hDqJDTA/exec', e:'💀', tag:'Action', cat:'action'},
-      {t:'1001 Arabian Nights', u:'https://script.google.com/macros/s/AKfycbz_t7Vm2oO4vmgNYZ4uZG87maDj8Lcg5SmpMVV9rGl3irskmuLBttgpaRhuq5E5gBwDBQ/exec', e:'🌙', tag:'Puzzle', cat:'puzzle'},
-      {t:'2 Player Chess', u:'https://script.google.com/macros/s/AKfycbwD4aYk8804rFEa2GleUacBH110qmzS8bz-wHnRTTigY2HkE3iafHYLRCkH0nUGc_oA/exec', e:'♟️', tag:'Multiplayer', cat:'multiplayer'},
-      {t:'2-Player Dino Run', u:'https://script.google.com/macros/s/AKfycbzblFS2xfWNWEfzVJvHHI-t7SiXBaK0M1_rSxf3dcaEFyCUs8eKVc9KEma-a1cRwy2A/exec', e:'🦕', tag:'Multiplayer', cat:'multiplayer'},
-      {t:'2D World', u:'https://script.google.com/macros/s/AKfycbyV7qTUXOBtYWcSIvoPN2cnwVrdZ6dU_01TBF8CIgoMDzqh9gxkeX0EvCkKJoKMjHYz/exec', e:'🌍', tag:'Adventure', cat:'adventure'},
       {t:'2048', u:'https://script.google.com/macros/s/AKfycbwgo9fzGlgbzqpBKfXrw7gGGvg8cYPPL-ycgd_y9jKePSDVnk_zr_keYn8v-0eUJQd5/exec', e:'🔢', tag:'Puzzle', cat:'puzzle'},
       {t:'2048 Legend', u:'https://script.google.com/macros/s/AKfycbzbZssyAtjMWY1j2C76xHryiswAJgxLWh6C5c7XS6cofZZrq7qvFuDURSchkl24315F/exec', e:'👑', tag:'Puzzle', cat:'puzzle'},
       {t:'2048 Shoot', u:'https://script.google.com/macros/s/AKfycbw83uxYRr534DXrzIHS5T6Q5AeQtQnMdkk8Dxxo3i732YYOm6pr6LqO730wHogB7sI/exec', e:'🎯', tag:'Puzzle', cat:'puzzle'},
-      {t:'2048 X2 Legends', u:'https://script.google.com/macros/s/AKfycbzGAUWvsqZc6WqL_-8FZe8cAAyyzs1cLKK1sDkE6EyyOMMXO56tPJqg-QcNTdLSS31i/exec', e:'⚡', tag:'Puzzle', cat:'puzzle'},
       {t:'3 Pandas', u:'https://script.google.com/macros/s/AKfycbyCj8rm46awBKgGEsThfN6TwbL_WEfzx2xfLhXPaZNxDBBuD-v4uGQvcXusNlpuk8lg/exec', e:'🐼', tag:'Adventure', cat:'adventure'},
       {t:'3 Pandas 2 Night', u:'https://script.google.com/macros/s/AKfycbw6oTknzPj4n1yIKixw9uxxP3042RdoXTCp61Pg6duI5oa6PNamciA6vtw0ke4-Izk5uA/exec', e:'🌑', tag:'Adventure', cat:'adventure'},
-      {t:'3 Pandas in Brazil', u:'https://script.google.com/macros/s/AKfycbxVytKEnnhTzSm067_cR6yzq38M2tDoLhVCPFqOfkPpuk9n1arzIaEHGfDn-osZJwQx/exec', e:'🐼', tag:'Adventure', cat:'adventure'},
-      {t:'3 Pandas in Fantasy', u:'https://script.google.com/macros/s/AKfycbzwYX3JMCHF0sl5OJp2FvJdNEcHlhwKGhYUQ6erBMhH9bgVrz2nzMtLHpeeGDYDJd_U/exec', e:'🧚', tag:'Adventure', cat:'adventure'},
-      {t:'3 Pandas in Japan', u:'https://script.google.com/macros/s/AKfycbxQvFLpVLkI_lmW4aeGRhwa8PdwSg_4YrrenFpMTJxkOFMm292ToUyp1BE1r7DYmzJ6/exec', e:'🗾', tag:'Adventure', cat:'adventure'},
-      {t:'3 Little Heroes', u:'https://script.google.com/macros/s/AKfycbzQIs0XBlZzFopZXscM5z46uk3WEZKIXRXsB8Az5RNVv4djCc8ea5wF5NkPcElEOPE0/exec', e:'🦸', tag:'Action', cat:'action'},
-      {t:'3 on 3 Hockey', u:'https://script.google.com/macros/s/AKfycbzuVw8Y9bVL0oph4sEjz1W_vo2BPIW_vZSMLH9gj1k12JeF4V6lmCbosEufksUp4QPkag/exec', e:'🏒', tag:'Sports', cat:'sports'},
-      {t:'3 Slices', u:'https://script.google.com/macros/s/AKfycbwc8tQNjhcp1UvhLlIm2xn0eWosHu36CInDe9hXwDc__kbXB1GwneLwGSlGLMx2hxAE/exec', e:'🍕', tag:'Puzzle', cat:'puzzle'},
-      {t:'3 Slices 2', u:'https://script.google.com/macros/s/AKfycbx_WwiQFRH389oDI9eTrYcxwN_T_MhN0JOH3SbGfKE4oqDaKUJaprotK869ogqAuHoAZg/exec', e:'🍕', tag:'Puzzle', cat:'puzzle'},
-      {t:'5xMan', u:'https://script.google.com/macros/s/AKfycbzPX_9WOPS6ffomQquz5p2hQ05xCWQS4wzJa1vw7ji-XX-W1zuiiifzzT5gcbOgeSRb/exec', e:'🕹️', tag:'Action', cat:'action'},
-      {t:'7 Days Without Rain', u:'https://script.google.com/macros/s/AKfycbxgVuqt5WWMel9kMaeOqr1kCkcYmnzkummHCObLlR7DC4qPFkc5x9g6u_9lQhQ0LNfm/exec', e:'☀️', tag:'Adventure', cat:'adventure'},
-      {t:'7th Inning Smash', u:'https://script.google.com/macros/s/AKfycbx5DoGRFsMer9UC9NfBvXUkmP_BnVVCgHnOUQGY2uOMWWJQ1gBzEVEqLOeIM5oPBje7Ng/exec', e:'⚾', tag:'Sports', cat:'sports'},
-      {t:'8 Ball Pool', u:'https://script.google.com/macros/s/AKfycbxaL_B8Zo2IVTPOvhbqkz8P-JmZsSqrtXgbAjlJ3_xsw-jmNvI9wpmZsYq99PDE4cOL/exec', e:'🎱', tag:'Sports', cat:'sports'},
       {t:'10 Bullets', u:'https://script.google.com/macros/s/AKfycbwZwrDnGWCLYJs0TMPe-SI29MoJla6tHJ7uA8DaGSS9EXwJuVeeuQxoBNXRYUopo6STXg/exec', e:'🔴', tag:'Action', cat:'action'},
       {t:'10 Minutes Till Dawn', u:'https://script.google.com/macros/s/AKfycbx2IFRHO-Q3RsgjhwW_bUmXSIRPff-nBBosAEZeXD8Y0e9EpfFFjCjJZzPWvO5147UY/exec', e:'🌅', tag:'Action', cat:'action'},
-      {t:'10 More Bullets', u:'https://script.google.com/macros/s/AKfycbyoLIwbMnHRpl9QdLeitp4hZZ1UTa8lL0FUw0gZeHjLvZe1EMfpalcK_2awrtxlDAnA/exec', e:'💣', tag:'Action', cat:'action'},
-      {t:'10 is Again', u:'https://script.google.com/macros/s/AKfycbxVIoku3O8oezuYWVeWbFXvxRk21uCWyJAEnG58Ay7TvykGXBIv4Rd7csvz22423OEh/exec', e:'🔢', tag:'Puzzle', cat:'puzzle'},
-      {t:'12 MiniBattles', u:'https://script.google.com/macros/s/AKfycbw73xjm9WWdI_rMibzPh2MImZBf6tsNOoUnhotODbh0qEG5jHf5UvD4K5uDVwtgEnQw8Q/exec', e:'⚔️', tag:'Multiplayer', cat:'multiplayer'},
-      {t:'13 Days in Hell', u:'https://script.google.com/macros/s/AKfycbz0DOQNEqAE9GB-45d5QfyQRB6zE3G67sER1QBW7m28ivuH_qItWk-ouEgoJKQymWedvA/exec', e:'☠️', tag:'Action', cat:'action'},
-      {t:'40x Escape', u:'https://script.google.com/macros/s/AKfycby4I_nNLhNlPxliiHr3R_qNVWB33hxXuqywwp7-TZsFPksPgQKxUmlPUNBxO_aPhYnV/exec', e:'🚪', tag:'Puzzle', cat:'puzzle'},
-      {t:'60 Second Burger Run', u:'https://script.google.com/macros/s/AKfycbw4aO7Qz5XoO4KO5dmKQCy6DIUkbQ7c5tvXBIkv4mdjXFGJqrQ9YkqY4edXs7ScQ3zD/exec', e:'🍔', tag:'Action', cat:'action'},
-      {t:'60 Seconds Santa Run', u:'https://script.google.com/macros/s/AKfycbyf05_yYFZQyT9J94hH2rjd5soUEVJ1FcOCtt6AJ4Jv2PLONHF6unrsTeJhs0WxwQ3K9Q/exec', e:'🎅', tag:'Action', cat:'action'},
-      {t:'99 Balls', u:'https://script.google.com/macros/s/AKfycbxITALu9oE65UeWVJ59n1d8Z2f6Tda9ijHBb6tPhjz6YQz__GyDSKDl3t9rHxpZQ4_h/exec', e:'🔵', tag:'Puzzle', cat:'puzzle'},
-      {t:'99 Bricks', u:'https://script.google.com/macros/s/AKfycbxKdnBIlyJ5BKbI4cNEiOr2p-8nUDfZE53CgMh6xbqZWiprREQPal2rirfpX0YXKVAS/exec', e:'🧱', tag:'Puzzle', cat:'puzzle'},
-      {t:'99 Nights in Forest', u:'https://script.google.com/macros/s/AKfycbw4urIQgR3zAfmFsn3NWFC6kpsGYSWafyi6AWtyVNSyBkySH9O46LVnhej6fW7beFME/exec', e:'🌲', tag:'Adventure', cat:'adventure'},
       {t:'100 Meter Dash', u:'https://script.google.com/macros/s/AKfycbzMCtRLcwMaa-U103yUE9s1ynhknEWyK2uRIGPPAXBeV18nbQ55N9UOYgRQ5cTU6vDK5A/exec', e:'🏃', tag:'Sports', cat:'sports'},
-      {t:'100 Meter Sprint', u:'https://script.google.com/macros/s/AKfycbwIsVIqmkMwH3Bwjy7EhCXJtSb4A7Fiit8pJJ-lfOEfUaCmBE0ko3aMWPRXN0LskZm6Og/exec', e:'💨', tag:'Sports', cat:'sports'},
-      {t:'Abandoned', u:'https://script.google.com/macros/s/AKfycby6NyBKr5sGwJ5lGXSwGEq6DlpfC794H6eMj8ymQmt7T5l8_4Tk9yIXJhwNjzoifKIx/exec', e:'🏚️', tag:'Adventure', cat:'adventure'},
-      {t:'Abandoned: Cube Chambers', u:'https://script.google.com/macros/s/AKfycbwoBO363ht6VP6tcwCwCBI7B1WPveNYlyrvtRjjwAbT8TZNr7T4053p-xBD-5XfLSDJcQ/exec', e:'🟫', tag:'Puzzle', cat:'puzzle'},
-      {t:"Abobo's Big Adventure", u:'https://script.google.com/macros/s/AKfycbxaJG8SPxL7EDTIJKVqtfsiGZn3YReGz1Y2Kw76c8r4SWuGhYy4Ynl8br_Yddymkj9GfQ/exec', e:'💪', tag:'Action', cat:'action'},
+      {t:'Achievement Unlocked', u:'https://script.google.com/macros/s/AKfycbxEsaH5mWuWswPik3nCGEuPyk0b0tZ4hNsOoskqufxNRs-CIXGc5FFo5ORQAQu-ERgEJA/exec', e:'🏅', tag:'Puzzle', cat:'puzzle'},
+      {t:'Acid Bunny', u:'https://script.google.com/macros/s/AKfycbzQinbUFpM6_ZM3lSnGIvfg3iRSHGUFPWlOpWyYKQUBnyZG5CNiqOKTQk2KT7FlUcVQ/exec', e:'🐰', tag:'Action', cat:'action'},
+      {t:'Age of War', u:'https://script.google.com/macros/s/AKfycby2JlS7zrXUMn8a63H8TXhROmx6rrUrwjDAIGXeNrfRaoihzYLALwKC7MDq7fuzxWIoCw/exec', e:'⚔️', tag:'Action', cat:'action'},
+      {t:'Age of War 2', u:'https://script.google.com/macros/s/AKfycby-iGW7nI13rNOfHdtQvt2g3ik1HWzcZyr0US6sz_OeR2eN0flkKMyKjvvXVPs49WKE/exec', e:'🗡️', tag:'Action', cat:'action'},
+      {t:'Aground', u:'https://script.google.com/macros/s/AKfycby1Nz07kSzcaoXCQLTeomzT3C7eZAX3Sj1LjjZ-8JHNki0_4-uHxgexTSnrSe7lA40/exec', e:'⛏️', tag:'Adventure', cat:'adventure'},
+      {t:'Alien Hominid', u:'https://script.google.com/macros/s/AKfycbzrOZ0cqQb0dpn0GdgDq30cKDWmoZQOKvMkBFgiXjRKePgXJngOcZf6qJ28xncRIVZJBw/exec', e:'👽', tag:'Action', cat:'action'},
+      {t:'All Star Baseball', u:'https://script.google.com/macros/s/AKfycbyHCPDhTsZNsbEvBdcdACKn-JNaLreAM183O1mI2wz4e__W0m1jaF8i48Yt9mGVTESWPg/exec', e:'⚾', tag:'Sports', cat:'sports'},
+      {t:'Amateur Surgeon', u:'https://script.google.com/macros/s/AKfycbyy2qK5Y3WxXKSzTNT1sX9hy8kc2lqrZEQeoCJt8mqBBiD2uVlWMVa_V5Jr6DWtlx86/exec', e:'🩺', tag:'Action', cat:'action'},
+      {t:'A Dark Room', u:'https://script.google.com/macros/s/AKfycbxqlNh5IduglPReEuRaIb3wIobpempUhx55p4uUX8ZConj9hL2jDemjPT4Yo8TfIANd/exec', e:'🕯️', tag:'Adventure', cat:'adventure'},
+      {t:'Adventure Capitalist', u:'https://script.google.com/macros/s/AKfycbwpgLFA8CCkVpefUULez6Jcr2sQLjmilcD5OuoFHgMGVT4wY1Zd2BG2BrkRjYUEfuw/exec', e:'💰', tag:'Adventure', cat:'adventure'},
+      {t:'Air Hockey Cup', u:'https://script.google.com/macros/s/AKfycbw7VnhYKWITlJo9p8qyT8ExOfvnjvizq57_jj7MzDnyJWTuHtNbee3NHoEoRhuS6eqo/exec', e:'🏑', tag:'Sports', cat:'sports'},
+      {t:'Monkey Mart', u:'https://monkeymart6x.io/monkey-mart.embed', e:'🐵', tag:'Adventure', cat:'adventure'},
+      {t:'Retro Bowl', u:'https://g.w3technic.com/games/retro-bowl/', e:'🏈', tag:'Sports', cat:'sports'},
+      {t:'Stickman Hook', u:'https://monkeymart6x.io/stickman-hook.embed', e:'🕷️', tag:'Action', cat:'action'},
+      {t:'Slope', u:'https://slope-unblocked-10x.github.io/action-games/slope/', e:'🎿', tag:'Action', cat:'action'},
       {t:'A Bonte Escape', u:'https://script.google.com/macros/s/AKfycbzVKq9ne5rcUubHPpE-HPImNY32NL2_yezOIZtxMXqYXpzK35nAzmZnJGWkJXmzsww/exec', e:'🔓', tag:'Puzzle', cat:'puzzle'},
       {t:'Above Average Guy', u:'https://script.google.com/macros/s/AKfycbwHW2sQSPoAPmMFTKLjOJCN8yk-bOWq28ZSTm_I3C1pTMDydp9KHAXgTn_TTM_l3nzLAg/exec', e:'🙂', tag:'Action', cat:'action'},
       {t:'Absorbed', u:'https://script.google.com/macros/s/AKfycby6l7gc5NeYP527oEuPWpsQlveByRmjcYwnrg4RxB5lImjVPMIyokKNWYrey83tRo_r/exec', e:'🌀', tag:'Puzzle', cat:'puzzle'},
       {t:'Abuba the Alien', u:'https://script.google.com/macros/s/AKfycbwCGsJSC8Rl8gMVTMloH4E6tuqonrh-SYemixZslrOacv2GhQgU6_a0hnfeiS6IwhG60g/exec', e:'👽', tag:'Adventure', cat:'adventure'},
       {t:'Ace Gangster', u:'https://script.google.com/macros/s/AKfycbyPJseC7UCOVNCBxq-QmhUn0pZzqAl7e4Ujkc9POkc9jCKtpXnOZYWP79H-EIGFHmk8/exec', e:'🕶️', tag:'Action', cat:'action'},
       {t:'Ace Gangster Taxi', u:'https://script.google.com/macros/s/AKfycbyf7qxduEyYXs5E7bJ7WzdN0nZsCVRxyZEiX1MOkyo7mbmvDUIrLaKuxVjse5CmtJVlNg/exec', e:'🚕', tag:'Action', cat:'action'},
-      {t:'Achievement Unlocked', u:'https://script.google.com/macros/s/AKfycbxEsaH5mWuWswPik3nCGEuPyk0b0tZ4hNsOoskqufxNRs-CIXGc5FFo5ORQAQu-ERgEJA/exec', e:'🏅', tag:'Puzzle', cat:'puzzle'},
-      {t:'Achievement Unlocked 2', u:'https://script.google.com/macros/s/AKfycbw0TbKNWfaP_jmOuUwViTG4wWK3zSVkmiIv9OqSiAIc9NZTZYW1xMS8YcGYBSXWPDabCw/exec', e:'🥈', tag:'Puzzle', cat:'puzzle'},
-      {t:'Achievement Unlocked 3', u:'https://script.google.com/macros/s/AKfycbzGgF42MoiILQLTVDjfJ7XPFqKSVu9mFIkfdt9EOQwnVP_UdFRJHrue6kjwtZGJKkvC/exec', e:'🥇', tag:'Puzzle', cat:'puzzle'},
       {t:'Achilles', u:'https://script.google.com/macros/s/AKfycbyhEZPvEN2n6KlWOzOua2UjeLIxHR9AV14Il8ufTYNgvdvxpkTZxZPVSWlgwOIeba670Q/exec', e:'⚔️', tag:'Action', cat:'action'},
-      {t:'Acid Bunny', u:'https://script.google.com/macros/s/AKfycbzQinbUFpM6_ZM3lSnGIvfg3iRSHGUFPWlOpWyYKQUBnyZG5CNiqOKTQk2KT7FlUcVQ/exec', e:'🐰', tag:'Action', cat:'action'},
       {t:'Acid Bunny 2', u:'https://script.google.com/macros/s/AKfycbwboektrWd8rlGoyqQylkwAPbrx0gGg3QvJ-bYg3Kc9IiQK-_H89RN-L6OTZK_qL2_Vrg/exec', e:'🐇', tag:'Action', cat:'action'},
       {t:'Acid Rain', u:'https://script.google.com/macros/s/AKfycbwaVYAatmuoFi6_bwXdFxMg5a_XCAkmSJUXIlttbMEkt2M0_FuFn2s_AuEB4N4G4bTZ/exec', e:'🌧️', tag:'Action', cat:'action'},
       {t:'Action Turnip', u:'https://script.google.com/macros/s/AKfycbz2GrrcDq7T6-ypg7ObskaWqHsNbeXLhF9fj3r5RLxYYZiB0AVVPgc4Z0AakD_kSzMK/exec', e:'🥕', tag:'Action', cat:'action'},
-      {t:'A Dark Room', u:'https://script.google.com/macros/s/AKfycbxqlNh5IduglPReEuRaIb3wIobpempUhx55p4uUX8ZConj9hL2jDemjPT4Yo8TfIANd/exec', e:'🕯️', tag:'Adventure', cat:'adventure'},
-      {t:'Adventure Capitalist', u:'https://script.google.com/macros/s/AKfycbwpgLFA8CCkVpefUULez6Jcr2sQLjmilcD5OuoFHgMGVT4wY1Zd2BG2BrkRjYUEfuw/exec', e:'💰', tag:'Adventure', cat:'adventure'},
-      {t:'Age of Defense', u:'https://script.google.com/macros/s/AKfycbzk5XThcxe-JcfgFLDj0pC-gne_3x-RD4Vl-0mdfaoie7KIFK6BVN40YDAco81kRwmRGg/exec', e:'🛡️', tag:'Action', cat:'action'},
-      {t:'Age of Defense 3', u:'https://script.google.com/macros/s/AKfycbxDF_MrvC7-l7eYJ8H-906kKqP5pq5hNSPL9vcdWmfUznnntS62WJgfk9dYaQrDHYtp/exec', e:'🛡️', tag:'Action', cat:'action'},
-      {t:'Age of Defense 4', u:'https://script.google.com/macros/s/AKfycbyP5GN8qFVabyxK_ofoEEl3U6ZWGD1MbOeK-cTk1PhkngDAXpqVLQ-QOMum1cDPfJiT/exec', e:'🛡️', tag:'Action', cat:'action'},
-      {t:'Age of War', u:'https://script.google.com/macros/s/AKfycby2JlS7zrXUMn8a63H8TXhROmx6rrUrwjDAIGXeNrfRaoihzYLALwKC7MDq7fuzxWIoCw/exec', e:'⚔️', tag:'Action', cat:'action'},
-      {t:'Age of War 2', u:'https://script.google.com/macros/s/AKfycby-iGW7nI13rNOfHdtQvt2g3ik1HWzcZyr0US6sz_OeR2eN0flkKMyKjvvXVPs49WKE/exec', e:'🗡️', tag:'Action', cat:'action'},
-      {t:'Ages of Conflict', u:'https://script.google.com/macros/s/AKfycbxiDFP9OMAHIh0XO1qxiKa2U_gv77BMVUFMcql7VmcQ8ImnPJaj2VgMFPOIlUQeQVv4iA/exec', e:'⚔️', tag:'Action', cat:'action'},
       {t:'Agent B10', u:'https://script.google.com/macros/s/AKfycbwfXuoo0V_LnRxg_Y_MBiSmGNTknokYatGmW_ia3V2mT0mUQFsD6Pj1T1O_2fzb5pgI/exec', e:'🕵️', tag:'Action', cat:'action'},
-      {t:'Agent B10 2', u:'https://script.google.com/macros/s/AKfycbxz2gjfF6BmdXPiRlKhkrRUYecvEtP2Xl3ch0kQdFRkAnRi4XDUBpZEwFriRdACW14aqw/exec', e:'🕵️', tag:'Action', cat:'action'},
-      {t:'A Grim Chase', u:'https://script.google.com/macros/s/AKfycbxED2-Dek8r--4kI81M0bBp0Iqf4qPIi9bAJZkS4OvnAG5IGrSaHLoD1o_DSsF1uuBk/exec', e:'👻', tag:'Adventure', cat:'adventure'},
-      {t:'A Grim Granny', u:'https://script.google.com/macros/s/AKfycbxzu4vUjfrU1039Qn5Xx01Bhh1Htz27yuf_hVMmbJEZZSbND7KIzBv-qT0ZxbhWAWB0/exec', e:'👴', tag:'Adventure', cat:'adventure'},
-      {t:'A Grim Love Tale', u:'https://script.google.com/macros/s/AKfycbzwpd-nlJXEljLPKkpFtS9T6AQ3om5e3mnkxxMsLkpn-fyrnp6NJdDXnqLNtJ-oXkMm/exec', e:'💔', tag:'Adventure', cat:'adventure'},
-      {t:'Aground', u:'https://script.google.com/macros/s/AKfycby1Nz07kSzcaoXCQLTeomzT3C7eZAX3Sj1LjjZ-8JHNki0_4-uHxgexTSnrSe7lA40/exec', e:'⛏️', tag:'Adventure', cat:'adventure'},
-      {t:'A Gun In Time', u:'https://script.google.com/macros/s/AKfycbxGMbAveJIBmuRqGHmZWbQVQ2y55bADR0a79sU928H7uM-nTqRJJ636Om7sjDHTwAfP/exec', e:'🔫', tag:'Action', cat:'action'},
-      {t:'Ahoy Survival', u:'https://script.google.com/macros/s/AKfycbyzVkBvWyVbdMcOo68Fh2bzuKaGAPmJdypz7toaDyxYMoctbxh7cgg6DC-LGUdA-LZ0Ow/exec', e:'⛵', tag:'Adventure', cat:'adventure'},
-      {t:'Air Hockey Cup', u:'https://script.google.com/macros/s/AKfycbw7VnhYKWITlJo9p8qyT8ExOfvnjvizq57_jj7MzDnyJWTuHtNbee3NHoEoRhuS6eqo/exec', e:'🏑', tag:'Sports', cat:'sports'},
-      {t:'Airport Madness 3', u:'https://script.google.com/macros/s/AKfycbyZsrMto29mmijOkE5mKJ8FUEWWxfDjX8vIj5joKokJd322CrIDG58r84pogci5lAbp/exec', e:'✈️', tag:'Puzzle', cat:'puzzle'},
-      {t:'Airport Madness 4', u:'https://script.google.com/macros/s/AKfycbxgpwDeILAC23mp4qv8ntJDRYLJu6UpQhBjmQSfbDDdTtlbl6RDc625lt8KKeU9nM7l/exec', e:'🛫', tag:'Puzzle', cat:'puzzle'},
-      {t:'A Koopa\'s Revenge', u:'https://script.google.com/macros/s/AKfycbzOvbdeptNsmG-5xxyOFDltDImgPcHm2_RE92JvHNz_Y8X11tyvlKC28Z4fk7xdTM1M/exec', e:'🐢', tag:'Action', cat:'action'},
-      {t:'A Koopa\'s Revenge 2', u:'https://script.google.com/macros/s/AKfycbxKqeeGli-n0w8ywrZzJZZhibn_NHoEJlcJKHipbT41t3nv9h_dG0C8HtoQDqed4FnlRQ/exec', e:'🐢', tag:'Action', cat:'action'},
-      {t:'Alchemy Craft', u:'https://script.google.com/macros/s/AKfycbys6EWp1HVak7IkwITLTRhTPSIhM0__9Ukvyp8BbtcXVkl5f3Dk43J4dvtghqNcJlXX0g/exec', e:'⚗️', tag:'Puzzle', cat:'puzzle'},
-      {t:'Alchemy Elements', u:'https://script.google.com/macros/s/AKfycbzHl6eNLg7-zlj3oJxw9BMs9ju2XFBjj9dDt8VPzMjwioBHZXb74hJ-GXXiq-z-UdBI/exec', e:'🧪', tag:'Puzzle', cat:'puzzle'},
-      {t:'Alchemy Physic', u:'https://script.google.com/macros/s/AKfycbydjArG5HwSQuuyDbqojBUig4_-PqW47xYwaXlMWzu_VFLxlClxlJ-yo0QNYhzAqK6T/exec', e:'⚛️', tag:'Puzzle', cat:'puzzle'},
-      {t:'Alexander Dawn of an Empire', u:'https://script.google.com/macros/s/AKfycbySmwkNl5vxIY1bsc7RJJF3ZfHp9TkMho4fc6Vtt91QPrX31OX1y14an84BPq5o-zE8/exec', e:'👑', tag:'Adventure', cat:'adventure'},
-      {t:'Alien Complex', u:'https://script.google.com/macros/s/AKfycbzrOZ0cqQb0dpn0GdgDq30cKDWmoZQOKvMkBFgiXjRKePgXJngOcZf6qJ28xncRIVZJBw/exec', e:'👽', tag:'Action', cat:'action'},
-      {t:'Alien Hominid', u:'https://script.google.com/macros/s/AKfycbzrOZ0cqQb0dpn0GdgDq30cKDWmoZQOKvMkBFgiXjRKePgXJngOcZf6qJ28xncRIVZJBw/exec', e:'👽', tag:'Action', cat:'action'},
-      {t:'Alien Striker', u:'https://script.google.com/macros/s/AKfycbywEtmmqmybjbJaLYbsJh-W5pKpqs7NwZH97EsnTie0BQBwjcjqYwq-pNgJli7zbmM/exec', e:'🎯', tag:'Action', cat:'action'},
-      {t:'Alien Transporter', u:'https://script.google.com/macros/s/AKfycbxl291afFEgHX2rojBk3yyf-AXjsTpsn_khZX3gUx4WRH2MwmLbXrSjSSMnK3s0_EgTOQ/exec', e:'🚀', tag:'Adventure', cat:'adventure'},
-      {t:'All-American Championship Football', u:'https://script.google.com/macros/s/AKfycbx6NFqG0VLoLq8AnCxBL0_jEeaoS_Ui4MBS3UzBHUW-cwrQDZvt6hQT43RGDBJxnCrP/exec', e:'🏈', tag:'Sports', cat:'sports'},
-      {t:'All Star Baseball', u:'https://script.google.com/macros/s/AKfycbyHCPDhTsZNsbEvBdcdACKn-JNaLreAM183O1mI2wz4e__W0m1jaF8i48Yt9mGVTESWPg/exec', e:'⚾', tag:'Sports', cat:'sports'},
-      {t:'Alone in the Madness', u:'https://script.google.com/macros/s/AKfycby6AF_Ux0AMSlNgAEcilI9C0Ua7kzK-laseJC_jXdlnbMe-bpeLpE8Fio646-NN6di41Q/exec', e:'😵', tag:'Action', cat:'action'},
-      {t:'Amateur Surgeon', u:'https://script.google.com/macros/s/AKfycbyy2qK5Y3WxXKSzTNT1sX9hy8kc2lqrZEQeoCJt8mqBBiD2uVlWMVa_V5Jr6DWtlx86/exec', e:'🩺', tag:'Action', cat:'action'},
-      {t:'Amazing Strange Rope Police', u:'https://script.google.com/macros/s/AKfycbwAoMJxFkkCGbz6H0x2lq5uVhb1vvQRKraex1znydX5Gm0jWse3HWUTvdU34ghoPqQauQ/exec', e:'🚔', tag:'Action', cat:'action'},
-      {t:'Monkey Mart', u:'https://monkeymart6x.io/monkey-mart.embed', e:'🐵', tag:'Adventure', cat:'adventure'},
-      {t:'Retro Bowl', u:'https://g.w3technic.com/games/retro-bowl/', e:'🏈', tag:'Sports', cat:'sports'},
-      {t:'Stickman Hook', u:'https://monkeymart6x.io/stickman-hook.embed', e:'🕷️', tag:'Action', cat:'action'},
-      {t:'Slope', u:'https://slope-unblocked-10x.github.io/action-games/slope/', e:'🎿', tag:'Action', cat:'action'},
     ];
-
-    const TMAP = {sports:'ts', action:'ta', puzzle:'tp', multiplayer:'tm', adventure:'tv'};
 
     function updateCounts(){
       const cats = {sports:'cnt-sports', action:'cnt-action', puzzle:'cnt-puzzle', multiplayer:'cnt-multi', adventure:'cnt-adv'};
@@ -1676,7 +1585,7 @@
       none.style.display = 'none';
       grid.innerHTML = list.map((g, i) => {
         const esc = s => s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        return `<div class="gc" style="animation-delay:${Math.min(i*.012,.3)}s" onclick="openGame('${esc(g.u)}','${esc(g.t)}')">
+        return `<div class="gc" style="animation-delay:${Math.min(i*.02,.3)}s" onclick="openGame('${esc(g.u)}','${esc(g.t)}')">
           <div class="gthumb"><span style="position:relative;z-index:1">${g.e}</span></div>
           <div class="gbody"><div class="gname">${g.t}</div><div class="gcat">${g.tag}</div></div>
         </div>`;
@@ -1726,7 +1635,6 @@
       const rect = gwin.getBoundingClientRect();
       offset.x = e.clientX - rect.left;
       offset.y = e.clientY - rect.top;
-      gwin.classList.add('dragging');
     });
 
     document.addEventListener('mousemove', (e) => {
@@ -1736,7 +1644,7 @@
       let newY = e.clientY - offset.y;
       
       newX = Math.max(0, Math.min(newX, window.innerWidth - gwin.offsetWidth));
-      newY = Math.max(0, Math.min(newY, window.innerHeight - 52 - gwin.offsetHeight));
+      newY = Math.max(0, Math.min(newY, window.innerHeight - 54 - gwin.offsetHeight));
       
       gwin.style.left = newX + 'px';
       gwin.style.top = newY + 'px';
@@ -1744,7 +1652,6 @@
 
     document.addEventListener('mouseup', () => {
       isDragging = false;
-      gwin.classList.remove('dragging');
     });
 
     // ═══════════════════════════════════════════════════════════════
@@ -1788,7 +1695,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // CLAUDE AI CHAT ENGINE
+    // GROQ FREE AI CHAT
     // ═══════════════════════════════════════════════════════════════
     const aiDrawer = document.getElementById('aid');
     document.getElementById('aiToggle').addEventListener('click', () => aiDrawer.classList.toggle('open'));
@@ -1799,9 +1706,9 @@
     const aiInput = document.getElementById('aiinput');
     const aiSend = document.getElementById('aisend');
 
-    function addMsg(role, text, extra = ''){
+    function addMsg(role, text){
       const d = document.createElement('div');
-      d.className = 'msg ' + role + (extra ? ' ' + extra : '');
+      d.className = 'msg ' + role;
       const who = document.createElement('div');
       who.className = 'msg-who';
       who.textContent = role === 'me' ? 'You' : 'Stars AI';
@@ -1842,7 +1749,7 @@
         hideLoading();
         setTimeout(() => {
           addMsg('ai', '🔐 CREATOR VERIFIED\n\nWelcome back, Samuel A Carino.\nYou are the owner and creator of Stars OS.\nFull system access granted. ✦');
-        }, 300);
+        }, 200);
         return;
       }
 
@@ -1854,64 +1761,46 @@
       showLoading();
 
       try {
-        const apiKey = getAPIKey();
+        const apiKey = getAIKey();
         if (!apiKey) {
           hideLoading();
-          addMsg('err', 'API Key not set. Click the AI button and set your OpenRouter key.');
+          addMsg('err', 'API Key not set. Enter your free Groq key!');
           aiSend.disabled = false;
           aiInput.disabled = false;
           return;
         }
 
-        const response = await fetch('https://openrouter.io/api/v1/chat/completions', {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': window.location.href
+            'Authorization': `Bearer ${apiKey}`
           },
           body: JSON.stringify({
-            model: 'claude-3.5-sonnet',
-            messages: [
-              {
-                role: 'user',
-                content: text
-              }
-            ],
-            max_tokens: 500
+            model: 'mixtral-8x7b-32768',
+            messages: [{role: 'user', content: text}],
+            max_tokens: 500,
+            temperature: 0.7
           })
         });
 
         hideLoading();
 
         if (!response.ok) {
-          let errorMsg = 'API Error';
-          try {
-            const error = await response.json();
-            errorMsg = error.error?.message || error.message || `Error ${response.status}`;
-          } catch(e) {
-            errorMsg = `HTTP ${response.status}: ${response.statusText}`;
-          }
-          addMsg('err', '❌ ' + errorMsg);
+          const error = await response.json();
+          addMsg('err', '❌ ' + (error.error?.message || 'API Error'));
+          aiSend.disabled = false;
+          aiInput.disabled = false;
           return;
         }
 
         const data = await response.json();
-        if (!data.choices || !data.choices[0]) {
-          addMsg('err', '❌ Invalid API response');
-          return;
-        }
-        
         const reply = data.choices[0].message.content;
         addMsg('ai', reply);
 
       } catch(e) {
         hideLoading();
-        let errMsg = e.message;
-        if (e.message.includes('Failed to fetch')) {
-          errMsg = '🔑 SOLUTION: Make sure your OpenRouter API key is valid and has credits. Or try: openrouter.io → Dashboard → Check API limits';
-        }
-        addMsg('err', '❌ ' + errMsg);
+        addMsg('err', '❌ Error: ' + e.message);
       } finally {
         aiSend.disabled = false;
         aiInput.disabled = false;
