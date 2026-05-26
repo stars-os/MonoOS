@@ -1,555 +1,559 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stars OS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #1a0f35;
-      --secondary: #2d1b4e;
-      --accent: #d4a5ff;
-      --accent-dark: #9d6cff;
-      --text-primary: #f5f0ff;
-      --text-secondary: #c8b5e0;
-      --text-muted: #7a6b99;
-      --border: rgba(212, 165, 255, 0.15);
-      --bg-hover: rgba(212, 165, 255, 0.08);
-      --glow: rgba(212, 165, 255, 0.3);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Cloaker Metadata -->
+    <title>My Drive - Google Drive</title>
+    <meta name="description" content="Access your files anywhere.">
+    <meta name="keywords" content="drive, google, storage, files">
+    
+    <style>
+        :root {
+            --neon-purple: #d4a5ff;
+            --bg-dark: #0a0518;
+            --glass: rgba(20, 10, 35, 0.7);
+            --glass-border: rgba(212, 165, 255, 0.2);
+            --glow: 0 0 15px rgba(212, 165, 255, 0.4);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-    html, body {
-      height: 100%;
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+        body, html {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg-dark);
+            color: white;
+        }
 
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: linear-gradient(135deg, #1a0f35 0%, #0d0620 100%);
-      color: var(--text-primary);
-    }
+        /* --- BOOT SCREEN --- */
+        #boot-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease;
+        }
 
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
+        .boot-logo {
+            width: 100px;
+            height: 100px;
+            border: 4px solid var(--neon-purple);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+            box-shadow: var(--glow);
+        }
 
-    ::-webkit-scrollbar-track {
-      background: rgba(212, 165, 255, 0.05);
-    }
+        .boot-text {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 5px;
+            color: var(--neon-purple);
+            text-shadow: var(--glow);
+            margin-bottom: 30px;
+        }
 
-    ::-webkit-scrollbar-thumb {
-      background: var(--accent);
-      border-radius: 4px;
-    }
+        .progress-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
 
-    /* LAYOUT */
-    #desk {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--neon-purple);
+            box-shadow: var(--glow);
+            animation: progress 3s forwards;
+        }
 
-    header {
-      height: 60px;
-      background: rgba(26, 15, 53, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      padding: 0 2rem;
-      gap: 2rem;
-      flex-shrink: 0;
-    }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes progress { 100% { width: 100%; } }
 
-    .logo {
-      font-size: 1.2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--accent), #c4a1ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+        /* --- DESKTOP --- */
+        #desktop {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1a0b2e 0%, #0a0518 100%);
+            display: none;
+        }
 
-    .search {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      background: rgba(212, 165, 255, 0.05);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.6rem 1rem;
-      max-width: 300px;
-    }
+        canvas#starfield {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
 
-    .search input {
-      background: none;
-      border: none;
-      outline: none;
-      color: var(--text-primary);
-      width: 100%;
-      font-size: 0.9rem;
-    }
+        /* --- WINDOW SYSTEM --- */
+        .window {
+            position: absolute;
+            min-width: 300px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: windowOpen 0.3s ease;
+            z-index: 10;
+        }
 
-    .search input::placeholder {
-      color: var(--text-muted);
-    }
+        @keyframes windowOpen {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
 
-    .header-buttons {
-      display: flex;
-      gap: 0.8rem;
-    }
+        .window-header {
+            padding: 12px 18px;
+            background: rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            border-bottom: 1px solid var(--glass-border);
+        }
 
-    .header-btn {
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-primary);
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
+        .window-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--neon-purple);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-    .header-btn:hover {
-      background: var(--bg-hover);
-      border-color: var(--accent);
-    }
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
 
-    .header-btn.active {
-      background: var(--accent);
-      color: #1a0f35;
-      border: none;
-    }
+        .control-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
 
-    /* MAIN */
-    #main {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
+        .btn-close { background: #ff5f56; }
+        .btn-close:hover { background: #ff3b30; }
 
-    /* SIDEBAR */
-    aside {
-      width: 200px;
-      background: rgba(26, 15, 53, 0.5);
-      border-right: 1px solid var(--border);
-      overflow-y: auto;
-      padding: 1.5rem 1rem;
-    }
+        .window-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            max-height: 70vh;
+        }
 
-    .sidebar-section {
-      margin-bottom: 2rem;
-    }
+        /* --- GAME LIBRARY GRID --- */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
 
-    .sidebar-title {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.8rem;
-    }
+        .game-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
 
-    .sidebar-link {
-      display: block;
-      padding: 0.7rem 0.8rem;
-      border-radius: 8px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
-    }
+        .game-card:hover {
+            background: rgba(212, 165, 255, 0.1);
+            transform: translateY(-5px);
+            box-shadow: var(--glow);
+            border-color: var(--neon-purple);
+        }
 
-    .sidebar-link:hover {
-      background: var(--bg-hover);
-      color: var(--text-primary);
-    }
+        .game-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
 
-    .sidebar-link.active {
-      background: rgba(212, 165, 255, 0.1);
-      color: var(--accent);
-      border-color: var(--accent);
-    }
+        .game-title {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #eee;
+        }
 
-    /* CONTENT */
-    #content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 2rem;
-    }
+        /* --- TASKBAR --- */
+        #taskbar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            background: rgba(10, 5, 24, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+        }
 
-    .games-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 1.5rem;
-    }
+        .start-btn {
+            background: var(--neon-purple);
+            color: var(--bg-dark);
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 20px;
+            transition: var(--transition);
+        }
 
-    .game-card {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 1px solid var(--border);
-      background: rgba(212, 165, 255, 0.05);
-      aspect-ratio: 1 / 1.2;
-      display: flex;
-      flex-direction: column;
-    }
+        .start-btn:hover {
+            box-shadow: var(--glow);
+            filter: brightness(1.1);
+        }
 
-    .game-thumb {
-      flex: 1;
-      background: linear-gradient(135deg, rgba(212, 165, 255, 0.1), rgba(196, 161, 255, 0.1));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-      font-size: 3rem;
-    }
+        .taskbar-items {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
 
-    .play-btn {
-      position: absolute;
-      font-size: 3.5rem;
-      opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-    }
+        .taskbar-clock {
+            font-size: 0.9rem;
+            color: var(--neon-purple);
+            font-weight: 600;
+        }
 
-    .game-card:hover .play-btn {
-      opacity: 1;
-      transform: scale(1.1);
-    }
+        /* --- MODAL PLAYER --- */
+        #game-modal {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
 
-    .game-card:hover .game-thumb {
-      background: linear-gradient(135deg, rgba(212, 165, 255, 0.2), rgba(196, 161, 255, 0.2));
-    }
+        #game-modal iframe {
+            flex: 1;
+            border: none;
+            background: #000;
+        }
 
-    .game-info {
-      padding: 1rem;
-      background: rgba(0, 0, 0, 0.3);
-      border-top: 1px solid var(--border);
-    }
+        .modal-header {
+            height: 40px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid #333;
+        }
 
-    .game-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 0.3rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+        .close-modal {
+            color: #ff5f56;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-    .game-category {
-      font-size: 0.7rem;
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    /* MODAL */
-    #gameModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem;
-    }
-
-    #gameModal.open {
-      display: flex;
-    }
-
-    .modal-content {
-      background: rgba(26, 15, 53, 0.95);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 90%;
-      height: 90%;
-      max-width: 1200px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    .modal-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-    }
-
-    .modal-close {
-      background: transparent;
-      border: none;
-      color: var(--text-primary);
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    .modal-body {
-      flex: 1;
-      overflow: hidden;
-    }
-
-    #gameFrame {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #000;
-    }
-
-    /* CLOAKER */
-    .cloaker-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 0.8rem 1.5rem;
-      background: var(--accent);
-      color: #1a0f35;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 0.9rem;
-      z-index: 999;
-    }
-
-    .cloaker-btn:hover {
-      opacity: 0.9;
-    }
-
-    /* CLOAKER CLASSROOM MODE */
-    body.cloaker-classroom {
-      background: #fff !important;
-    }
-
-    body.cloaker-classroom header {
-      background: #fff !important;
-      border-bottom: 1px solid #ddd !important;
-    }
-
-    body.cloaker-classroom .logo {
-      color: #1a0f35 !important;
-      -webkit-text-fill-color: #1a0f35 !important;
-      background: none !important;
-    }
-
-    body.cloaker-classroom aside {
-      background: #f8f9fa !important;
-      border-right: 1px solid #ddd !important;
-    }
-
-    body.cloaker-classroom .sidebar-title,
-    body.cloaker-classroom .sidebar-link,
-    body.cloaker-classroom .header-btn {
-      color: #202124 !important;
-    }
-
-    body.cloaker-classroom #content {
-      background: #fff !important;
-    }
-
-    body.cloaker-classroom .game-card {
-      background: #f8f9fa !important;
-      border: 1px solid #ddd !important;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
-      aside {
-        display: none;
-      }
-
-      .games-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 1rem;
-      }
-
-      header {
-        flex-wrap: wrap;
-      }
-
-      .search {
-        order: 3;
-        flex-basis: 100%;
-        margin-top: 0.5rem;
-      }
-    }
-  </style>
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-purple); }
+    </style>
 </head>
 <body>
 
-<div id="desk">
-  <header>
-    <div class="logo">✦ Stars OS</div>
-    <div class="search">
-      <input type="text" id="searchInput" placeholder="Search games...">
-    </div>
-    <div class="header-buttons">
-      <button class="header-btn active" onclick="filterGames('all')">All</button>
-      <button class="header-btn" onclick="filterGames('action')">Action</button>
-      <button class="header-btn" onclick="filterGames('sports')">Sports</button>
-      <button class="header-btn" onclick="filterGames('puzzle')">Puzzle</button>
-    </div>
-  </header>
-
-  <div id="main">
-    <aside>
-      <div class="sidebar-section">
-        <div class="sidebar-title">Library</div>
-        <div class="sidebar-link active" onclick="filterGames('all')">📚 All Games</div>
-        <div class="sidebar-link" onclick="filterGames('action')">💥 Action</div>
-        <div class="sidebar-link" onclick="filterGames('sports')">🏆 Sports</div>
-        <div class="sidebar-link" onclick="filterGames('puzzle')">🧩 Puzzle</div>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-title">Quick Play</div>
-        <div class="sidebar-link" onclick="openGame('https://slope-unblocked-10x.github.io/action-games/slope/', 'Slope', '🎿')">Slope</div>
-        <div class="sidebar-link" onclick="openGame('https://g.w3technic.com/games/retro-bowl/', 'Retro Bowl', '🏈')">Retro Bowl</div>
-      </div>
-    </aside>
-
-    <div id="content">
-      <div class="games-grid" id="gamesGrid"></div>
-    </div>
-  </div>
-</div>
-
-<!-- GAME MODAL -->
-<div id="gameModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Game</div>
-      <button class="modal-close" onclick="closeGame()">✕</button>
-    </div>
-    <div class="modal-body">
-      <iframe id="gameFrame"></iframe>
-    </div>
-  </div>
-</div>
-
-<!-- CLOAKER BUTTON -->
-<button class="cloaker-btn" onclick="toggleCloaker()">🎭 Cloaker</button>
-
-<script>
-  const GAMES = [
-    {t:'1 On 1 Basketball', u:'https://script.google.com/macros/s/AKfycbwDVKSBVuNK4axJUnLuqHJHWh7EubO4icUJldVaUPoVqjsalm2SB9mCKg7x6f0rU7O6OA/exec', e:'🏀', cat:'sports'},
-    {t:'1 On 1 Football', u:'https://script.google.com/macros/s/AKfycbwDQPy94m3iDQqxeBLkyAH8rWoNeunk0TyuS7j5qE6hSk3o3j6eoU7z5uy_qhgsKeKn/exec', e:'🏈', cat:'sports'},
-    {t:'1 On 1 Hockey', u:'https://script.google.com/macros/s/AKfycbyzYs6pQLcgMsjNZ1-YovjUPrruPQtfNcOjaOCMv0KpuRdjd05-u-2owQoardtV62a1/exec', e:'🏒', cat:'sports'},
-    {t:'1 On 1 Soccer', u:'https://script.google.com/macros/s/AKfycbxJ3oet4bnNqQK_nqPo6KSwPlvIMR448__kEYKx_WN-QbncNc98PEc-qaFme7l2tbKH/exec', e:'⚽', cat:'sports'},
-    {t:'1 On 1 Tennis', u:'https://script.google.com/macros/s/AKfycbwq66mQrL2jfU72rfIYu7h31dGJbSmmvbbkfEF21eOb0WX2UjJyZJq7QHiGEmAMBW2-rQ/exec', e:'🎾', cat:'sports'},
-    {t:'2048', u:'https://script.google.com/macros/s/AKfycbwgo9fzGlgbzqpBKfXrw7gGGvg8cYPPL-ycgd_y9jKePSDVnk_zr_keYn8v-0eUJQd5/exec', e:'🔢', cat:'puzzle'},
-    {t:'2048 Legend', u:'https://script.google.com/macros/s/AKfycbzbZssyAtjMWY1j2C76xHryiswAJgxLWh6C5c7XS6cofZZrq7qvFuDURSchkl24315F/exec', e:'👑', cat:'puzzle'},
-    {t:'3 Pandas', u:'https://script.google.com/macros/s/AKfycbyCj8rm46awBKgGEsThfN6TwbL_WEfzx2xfLhXPaZNxDBBuD-v4uGQvcXusNlpuk8lg/exec', e:'🐼', cat:'adventure'},
-    {t:'10 Bullets', u:'https://script.google.com/macros/s/AKfycbwZwrDnGWCLYJs0TMPe-SI29MoJla6tHJ7uA8DaGSS9EXwJuVeeuQxoBNXRYUopo6STXg/exec', e:'🔴', cat:'action'},
-    {t:'10 Minutes Till Dawn', u:'https://script.google.com/macros/s/AKfycbx2IFRHO-Q3RsgjhwW_bUmXSIRPff-nBBosAEZeXD8Y0e9EpfFFjCjJZzPWvO5147UY/exec', e:'🌅', cat:'action'},
-    {t:'100 Meter Dash', u:'https://script.google.com/macros/s/AKfycbzMCtRLcwMaa-U103yUE9s1ynhknEWyK2uRIGPPAXBeV18nbQ55N9UOYgRQ5cTU6vDK5A/exec', e:'🏃', cat:'sports'},
-    {t:'Acid Bunny', u:'https://script.google.com/macros/s/AKfycbzQinbUFpM6_ZM3lSnGIvfg3iRSHGUFPWlOpWyYKQUBnyZG5CNiqOKTQk2KT7FlUcVQ/exec', e:'🐰', cat:'action'},
-    {t:'Age of War', u:'https://script.google.com/macros/s/AKfycby2JlS7zrXUMn8a63H8TXhROmx6rrUrwjDAIGXeNrfRaoihzYLALwKC7MDq7fuzxWIoCw/exec', e:'⚔️', cat:'action'},
-    {t:'Age of War 2', u:'https://script.google.com/macros/s/AKfycby-iGW7nI13rNOfHdtQvt2g3ik1HWzcZyr0US6sz_OeR2eN0flkKMyKjvvXVPs49WKE/exec', e:'🗡️', cat:'action'},
-    {t:'Aground', u:'https://script.google.com/macros/s/AKfycby1Nz07kSzcaoXCQLTeomzT3C7eZAX3Sj1LjjZ-8JHNki0_4-uHxgexTSnrSe7lA40/exec', e:'⛏️', cat:'adventure'},
-    {t:'Alien Hominid', u:'https://script.google.com/macros/s/AKfycbzrOZ0cqQb0dpn0GdgDq30cKDWmoZQOKvMkBFgiXjRKePgXJngOcZf6qJ28xncRIVZJBw/exec', e:'👽', cat:'action'},
-    {t:'All Star Baseball', u:'https://script.google.com/macros/s/AKfycbyHCPDhTsZNsbEvBdcdACKn-JNaLreAM183O1mI2wz4e__W0m1jaF8i48Yt9mGVTESWPg/exec', e:'⚾', cat:'sports'},
-    {t:'Amateur Surgeon', u:'https://script.google.com/macros/s/AKfycbyy2qK5Y3WxXKSzTNT1sX9hy8kc2lqrZEQeoCJt8mqBBiD2uVlWMVa_V5Jr6DWtlx86/exec', e:'🩺', cat:'action'},
-    {t:'A Dark Room', u:'https://script.google.com/macros/s/AKfycbxqlNh5IduglPReEuRaIb3wIobpempUhx55p4uUX8ZConj9hL2jDemjPT4Yo8TfIANd/exec', e:'🕯️', cat:'adventure'},
-    {t:'Adventure Capitalist', u:'https://script.google.com/macros/s/AKfycbwpgLFA8CCkVpefUULez6Jcr2sQLjmilcD5OuoFHgMGVT4wY1Zd2BG2BrkRjYUEfuw/exec', e:'💰', cat:'adventure'},
-    {t:'Air Hockey Cup', u:'https://script.google.com/macros/s/AKfycbw7VnhYKWITlJo9p8qyT8ExOfvnjvizq57_jj7MzDnyJWTuHtNbee3NHoEoRhuS6eqo/exec', e:'🏑', cat:'sports'},
-    {t:'Monkey Mart', u:'https://monkeymart6x.io/monkey-mart.embed', e:'🐵', cat:'adventure'},
-    {t:'Retro Bowl', u:'https://g.w3technic.com/games/retro-bowl/', e:'🏈', cat:'sports'},
-    {t:'Stickman Hook', u:'https://monkeymart6x.io/stickman-hook.embed', e:'🕷️', cat:'action'},
-    {t:'Slope', u:'https://slope-unblocked-10x.github.io/action-games/slope/', e:'🎿', cat:'action'},
-    {t:'A Bonte Escape', u:'https://script.google.com/macros/s/AKfycbzVKq9ne5rcUubHPpE-HPImNY32NL2_yezOIZtxMXqYXpzK35nAzmZnJGWkJXmzsww/exec', e:'🔓', cat:'puzzle'},
-    {t:'Above Average Guy', u:'https://script.google.com/macros/s/AKfycbwHW2sQSPoAPmMFTKLjOJCN8yk-bOWq28ZSTm_I3C1pTMDydp9KHAXgTn_TTM_l3nzLAg/exec', e:'🙂', cat:'action'},
-    {t:'Absorbed', u:'https://script.google.com/macros/s/AKfycby6l7gc5NeYP527oEuPWpsQlveByRmjcYwnrg4RxB5lImjVPMIyokKNWYrey83tRo_r/exec', e:'🌀', cat:'puzzle'},
-    {t:'Abuba the Alien', u:'https://script.google.com/macros/s/AKfycbwCGsJSC8Rl8gMVTMloH4E6tuqonrh-SYemixZslrOacv2GhQgU6_a0hnfeiS6IwhG60g/exec', e:'👽', cat:'adventure'},
-    {t:'Ace Gangster', u:'https://script.google.com/macros/s/AKfycbyPJseC7UCOVNCBxq-QmhUn0pZzqAl7e4Ujkc9POkc9jCKtpXnOZYWP79H-EIGFHmk8/exec', e:'🕶️', cat:'action'},
-    {t:'Ace Gangster Taxi', u:'https://script.google.com/macros/s/AKfycbyf7qxduEyYXs5E7bJ7WzdN0nZsCVRxyZEiX1MOkyo7mbmvDUIrLaKuxVjse5CmtJVlNg/exec', e:'🚕', cat:'action'},
-    {t:'Achilles', u:'https://script.google.com/macros/s/AKfycbyhEZPvEN2n6KlWOzOua2UjeLIxHR9AV14Il8ufTYNgvdvxpkTZxZPVSWlgwOIeba670Q/exec', e:'⚔️', cat:'action'},
-    {t:'Acid Bunny 2', u:'https://script.google.com/macros/s/AKfycbwboektrWd8rlGoyqQylkwAPbrx0gGg3QvJ-bYg3Kc9IiQK-_H89RN-L6OTZK_qL2_Vrg/exec', e:'🐇', cat:'action'},
-    {t:'Acid Rain', u:'https://script.google.com/macros/s/AKfycbwaVYAatmuoFi6_bwXdFxMg5a_XCAkmSJUXIlttbMEkt2M0_FuFn2s_AuEB4N4G4bTZ/exec', e:'🌧️', cat:'action'},
-    {t:'Action Turnip', u:'https://script.google.com/macros/s/AKfycbz2GrrcDq7T6-ypg7ObskaWqHsNbeXLhF9fj3r5RLxYYZiB0AVVPgc4Z0AakD_kSzMK/exec', e:'🥕', cat:'action'},
-    {t:'Agent B10', u:'https://script.google.com/macros/s/AKfycbwfXuoo0V_LnRxg_Y_MBiSmGNTknokYatGmW_ia3V2mT0mUQFsD6Pj1T1O_2fzb5pgI/exec', e:'🕵️', cat:'action'},
-    {t:'Age of Defense', u:'https://script.google.com/macros/s/AKfycbzk5XThcxe-JcfgFLDj0pC-gne_3x-RD4Vl-0mdfaoie7KIFK6BVN40YDAco81kRwmRGg/exec', e:'🛡️', cat:'action'},
-    {t:'2048 Shoot', u:'https://script.google.com/macros/s/AKfycbw83uxYRr534DXrzIHS5T6Q5AeQtQnMdkk8Dxxo3i732YYOm6pr6LqO730wHogB7sI/exec', e:'🎯', cat:'puzzle'},
-    {t:'3 Pandas 2 Night', u:'https://script.google.com/macros/s/AKfycbw6oTknzPj4n1yIKixw9uxxP3042RdoXTCp61Pg6duI5oa6PNamciA6vtw0ke4-Izk5uA/exec', e:'🌑', cat:'adventure'},
-    {t:'Achievement Unlocked', u:'https://script.google.com/macros/s/AKfycbxEsaH5mWuWswPik3nCGEuPyk0b0tZ4hNsOoskqufxNRs-CIXGc5FFo5ORQAQu-ERgEJA/exec', e:'🏅', cat:'puzzle'},
-  ];
-
-  let currentFilter = 'all';
-
-  function renderGames() {
-    const grid = document.getElementById('gamesGrid');
-    const filtered = currentFilter === 'all' ? GAMES : GAMES.filter(g => g.cat === currentFilter);
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const results = filtered.filter(g => g.t.toLowerCase().includes(searchTerm));
-    
-    grid.innerHTML = results.map(game => `
-      <div class="game-card" onclick="openGame('${game.u.replace(/'/g, "\\'")}', '${game.t}', '${game.e}')">
-        <div class="game-thumb">
-          <span style="font-size:2.5rem;">${game.e}</span>
-          <div class="play-btn">▶</div>
+    <!-- BOOT SYSTEM -->
+    <div id="boot-screen">
+        <div class="boot-logo"></div>
+        <div class="boot-text">STARS OS</div>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
         </div>
-        <div class="game-info">
-          <div class="game-title">${game.t}</div>
-          <div class="game-category">${game.cat.toUpperCase()}</div>
+    </div>
+
+    <!-- DESKTOP ENVIRONMENT -->
+    <div id="desktop">
+        <canvas id="starfield"></canvas>
+        
+        <!-- Window Container -->
+        <div id="window-layer"></div>
+
+        <!-- Taskbar -->
+        <div id="taskbar">
+            <div class="start-btn" onclick="openLibrary()">STARS</div>
+            <div class="taskbar-items" id="taskbar-pins"></div>
+            <div class="taskbar-clock" id="clock">00:00:00</div>
         </div>
-      </div>
-    `).join('');
-  }
+    </div>
 
-  function filterGames(cat) {
-    currentFilter = cat;
-    document.querySelectorAll('.header-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    renderGames();
-  }
+    <!-- FULLSCREEN MODAL PLAYER -->
+    <div id="game-modal">
+        <div class="modal-header">
+            <span id="modal-game-title" style="color: var(--neon-purple); font-size: 0.8rem; font-weight: bold;">GAME PLAYER</span>
+            <span class="close-modal" onclick="closeGame()">ESC TO CLOSE ✖</span>
+        </div>
+        <iframe id="game-frame" src=""></iframe>
+    </div>
 
-  function openGame(url, title, emoji) {
-    document.getElementById('modalTitle').textContent = `${emoji} ${title}`;
-    document.getElementById('gameFrame').src = url;
-    document.getElementById('gameModal').classList.add('open');
-  }
+    <script>
+        // --- GAME DATA ---
+        const games = [
+            { title: "1 On 1 Basketball", url: "https://script.google.com/macros/s/AKfycbwDVKSBVuNK4axJUnLuqHJHWh7EubO4icUJldVaUPoVqjsalm2SB9mCKg7x6f0rU7O6OA/exec", icon: "🏀" },
+            { title: "1 On 1 Football", url: "https://script.google.com/macros/s/AKfycbwDQPy94m3iDQqxeBLkyAH8rWoNeunk0TyuS7j5qE6hSk3o3j6eoU7z5uy_qhgsKeKn/exec", icon: "🏈" },
+            { title: "1 On 1 Hockey", url: "https://script.google.com/macros/s/AKfycbyzYs6pQLcgMsjNZ1-YovjUPrruPQtfNcOjaOCMv0KpuRdjd05-u-2owQoardtV62a1/exec", icon: "🏒" },
+            { title: "1 On 1 Soccer", url: "https://script.google.com/macros/s/AKfycbxJ3oet4bnNqQK_nqPo6KSwPlvIMR448__kEYKx_WN-QbncNc98PEc-qaFme7l2tbKH/exec", icon: "⚽" },
+            { title: "1 On 1 Soccer Brazil", url: "https://script.google.com/macros/s/AKfycbxswxjq_hbSYU7FWSj6zgU5GBHGCS_axxnAf6Xu-_yQj_zyINBaEY9HNhE-3N3sBJeO/exec", icon: "🇧🇷" },
+            { title: "1 On 1 Tennis", url: "https://script.google.com/macros/s/AKfycbwq66mQrL2jfU72rfIYu7h31dGJbSmmvbbkfEF21eOb0WX2UjJyZJq7QHiGEmAMBW2-rQ/exec", icon: "🎾" },
+            { title: "1 Will Survive 2", url: "https://script.google.com/macros/s/AKfycbxwE_8QNir8i6xPqvqO99VE9Kw5DGmtvu-IRq4fL4vC1uHFDB0WEo3HG_buBW1hDqJDTA/exec", icon: "🌋" },
+            { title: "1001 Arabian Nights", url: "https://script.google.com/macros/s/AKfycbz_t7Vm2oO4vmgNYZ4uZG87maDj8Lcg5SmpMVV9rGl3irskmuLBttgpaRhuq5E5gBwDBQ/exec", icon: "🧞" },
+            { title: "2 Player Chess", url: "https://script.google.com/macros/s/AKfycbwD4aYk8804rFEa2GleUacBH110qmzS8bz-wHnRTTigY2HkE3iafHYLRCkH0nUGc_oA/exec", icon: "♟️" },
+            { title: "2-Player Dino Run", url: "https://script.google.com/macros/s/AKfycbzblFS2xfWNWEfzVJvHHI-t7SiXBaK0M1_rSxf3dcaEFyCUs8eKVc9KEma-a1cRwy2A/exec", icon: "🦖" },
+            { title: "2D World", url: "https://script.google.com/macros/s/AKfycbyV7qTUXOBtYWcSIvoPN2cnwVrdZ6dU_01TBF8CIgoMDzqh9gxkeX0EvCkKJoKMjHYz/exec", icon: "🌎" },
+            { title: "2048", url: "https://script.google.com/macros/s/AKfycbwgo9fzGlgbzqpBKfXrw7gGGvg8cYPPL-ycgd_y9jKePSDVnk_zr_keYn8v-0eUJQd5/exec", icon: "🔢" },
+            { title: "2048 Legend", url: "https://script.google.com/macros/s/AKfycbzbZssyAtjMWY1j2C76xHryiswAJgxLWh6C5c7XS6cofZZrq7qvFuDURSchkl24315F/exec", icon: "🏆" },
+            { title: "2048 Shoot", url: "https://script.google.com/macros/s/AKfycbw83uxYRr534DXrzIHS5T6Q5AeQtQnMdkk8Dxxo3i732YYOm6pr6LqO730wHogB7sI/exec", icon: "🔫" },
+            { title: "2048 X2 Legends", url: "https://script.google.com/macros/s/AKfycbzGAUWvsqZc6WqL_-8FZe8cAAyyzs1cLKK1sDkE6EyyOMMXO56tPJqg-QcNTdLSS31i/exec", icon: "💎" },
+            { title: "3 Pandas", url: "https://script.google.com/macros/s/AKfycbyCj8rm46awBKgGEsThfN6TwbL_WEfzx2xfLhXPaZNxDBBuD-v4uGQvcXusNlpuk8lg/exec", icon: "🐼" },
+            { title: "3 Pandas 2 Night", url: "https://script.google.com/macros/s/AKfycbw6oTknzPj4n1yIKixw9uxxP3042RdoXTCp61Pg6duI5oa6PNamciA6vtw0ke4-Izk5uA/exec", icon: "🌙" },
+            { title: "3 Pandas in Brazil", url: "https://script.google.com/macros/s/AKfycbxVytKEnnhTzSm067_cR6yzq38M2tDoLhVCPFqOfkPpuk9n1arzIaEHGfDn-osZJwQx/exec", icon: "🦜" },
+            { title: "3 Pandas in Fantasy", url: "https://script.google.com/macros/s/AKfycbzwYX3JMCHF0sl5OJp2FvJdNEcHlhwKGhYUQ6erBMhH9bgVrz2nzMtLHpeeGDYDJd_U/exec", icon: "⚔️" },
+            { title: "3 Pandas in Japan", url: "https://script.google.com/macros/s/AKfycbxQvFLpVLkI_lmW4aeGRhwa8PdwSg_4YrrenFpMTJxkOFMm292ToUyp1BE1r7DYmzJ6/exec", icon: "⛩️" },
+            { title: "3 Little Heroes", url: "https://script.google.com/macros/s/AKfycbzQIs0XBlZzFopZXscM5z46uk3WEZKIXRXsB8Az5RNVv4djCc8ea5wF5NkPcElEOPE0/exec", icon: "🛡️" },
+            { title: "3 on 3 Hockey", url: "https://script.google.com/macros/s/AKfycbzuVw8Y9bVL0oph4sEjz1W_vo2BPIW_vZSMLH9gj1k12JeF4V6lmCbosEufksUp4QPkag/exec", icon: "⛸️" },
+            { title: "3 Slices", url: "https://script.google.com/macros/s/AKfycbwc8tQNjhcp1UvhLlIm2xn0eWosHu36CInDe9hXwDc__kbXB1GwneLwGSlGLMx2hxAE/exec", icon: "🍕" },
+            { title: "3 Slices 2", url: "https://script.google.com/macros/s/AKfycbx_WwiQFRH389oDI9eTrYcxwN_T_MhN0JOH3SbGfKE4oqDaKUJaprotK869ogqAuHoAZg/exec", icon: "🍕" },
+            { title: "5xMan", url: "https://script.google.com/macros/s/AKfycbzPX_9WOPS6ffomQquz5p2hQ05xCWQS4wzJa1vw7ji-XX-W1zuiiifzzT5gcbOgeSRb/exec", icon: "🏃" },
+            { title: "7 Days Without Rain", url: "https://script.google.com/macros/s/AKfycbxgVuqt5WWMel9kMaeOqr1kCkcYmnzkummHCObLlR7DC4qPFkc5x9g6u_9lQhQ0LNfm/exec", icon: "🌧️" },
+            { title: "7th Inning Smash", url: "https://script.google.com/macros/s/AKfycbx5DoGRFsMer9UC9NfBvXUkmP_BnVVCgHnOUQGY2uOMWWJQ1gBzEVEqLOeIM5oPBje7Ng/exec", icon: "⚾" },
+            { title: "8 Ball Pool", url: "https://script.google.com/macros/s/AKfycbxaL_B8Zo2IVTPOvhbqkz8P-JmZsSqrtXgbAjlJ3_xsw-jmNvI9wpmZsYq99PDE4cOL/exec", icon: "🎱" },
+            { title: "10 Bullets", url: "https://script.google.com/macros/s/AKfycbwZwrDnGWCLYJs0TMPe-SI29MoJla6tHJ7uA8DaGSS9EXwJuVeeuQxoBNXRYUopo6STXg/exec", icon: "🔫" },
+            { title: "10 Minutes Till Dawn", url: "https://script.google.com/macros/s/AKfycbx2IFRHO-Q3RsgjhwW_bUmXSIRPff-nBBosAEZeXD8Y0e9EpfFFjCjJZzPWvO5147UY/exec", icon: "💀" },
+            { title: "10 More Bullets", url: "https://script.google.com/macros/s/AKfycbyoLIwbMnHRpl9QdLeitp4hZZ1UTa8lL0FUw0gZeHjLvZe1EMfpalcK_2awrtxlDAnA/exec", icon: "🔫" },
+            { title: "10 is Again", url: "https://script.google.com/macros/s/AKfycbxVIoku3O8oezuYWVeWbFXvxRk21uCWyJAEnG58Ay7TvykGXBIv4Rd7csvz22423OEh/exec", icon: "🔄" },
+            { title: "12 MiniBattles", url: "https://script.google.com/macros/s/AKfycbw73xjm9WWdI_rMibzPh2MImZBf6tsNOoUnhotODbh0qEG5jHf5UvD4K5uDVwtgEnQw8Q/exec", icon: "⚔️" },
+            { title: "13 Days in Hell", url: "https://script.google.com/macros/s/AKfycbz0DOQNEqAE9GB-45d5QfyQRB6zE3G67sER1QBW7m28ivuH_qItWk-ouEgoJKQymWedvA/exec", icon: "🔥" },
+            { title: "40x Escape", url: "https://script.google.com/macros/s/AKfycby4I_nNLhNlPxliiHr3R_qNVWB33hxXuqywwp7-TZsFPksPgQKxUmlPUNBxO_aPhYnV/exec", icon: "🗝️" },
+            { title: "60 Second Burger Run", url: "https://script.google.com/macros/s/AKfycbw4aO7Qz5XoO4KO5dmKQCy6DIUkbQ7c5tvXBIkv4mdjXFGJqrQ9YkqY4edXs7ScQ3zD/exec", icon: "🍔" },
+            { title: "60 Seconds Santa Run", url: "https://script.google.com/macros/s/AKfycbyf05_yYFZQyT9J94hH2rjd5soUEVJ1FcOCtt6AJ4Jv2PLONHF6unrsTeJhs0WxwQ3K9Q/exec", icon: "🎅" },
+            { title: "99 Balls", url: "https://script.google.com/macros/s/AKfycbxITALu9oE65UeWVJ59n1d8Z2f6Tda9ijHBb6tPhjz6YQz__GyDSKDl3t9rHxpZQ4_h/exec", icon: "🔴" },
+            { title: "99 Bricks", url: "https://script.google.com/macros/s/AKfycbxKdnBIlyJ5BKbI4cNEiOr2p-8nUDfZE53CgMh6xbqZWiprREQPal2rirfpX0YXKVAS/exec", icon: "🧱" },
+            { title: "99 Nights in Forest", url: "https://script.google.com/macros/s/AKfycbw4urIQgR3zAfmFsn3NWFC6kpsGYSWafyi6AWtyVNSyBkySH9O46LVnhej6fW7beFME/exec", icon: "🌳" },
+            { title: "100 Meter Dash", url: "https://script.google.com/macros/s/AKfycbzMCtRLcwMaa-U103yUE9s1ynhknEWyK2uRIGPPAXBeV18nbQ55N9UOYgRQ5cTU6vDK5A/exec", icon: "🏃" },
+            { title: "100 Meter Sprint", url: "https://script.google.com/macros/s/AKfycbwIsVIqmkMwH3Bwjy7EhCXJtSb4A7Fiit8pJJ-lfOEfUaCmBE0ko3aMWPRXN0LskZm6Og/exec", icon: "⚡" },
+            { title: "Abandoned", url: "https://script.google.com/macros/s/AKfycby6NyBKr5sGwJ5lGXSwGEq6DlpfC794H6eMj8ymQmt7T5l8_4Tk9yIXJhwNjzoifKIx/exec", icon: "🏚️" },
+            { title: "Abandoned: Cube Chambers", url: "https://script.google.com/macros/s/AKfycbwoBO363ht6VP6tcwCwCBI7B1WPveNYlyrvtRjjwAbT8TZNr7T4053p-xBD-5XfLSDJcQ/exec", icon: "📦" },
+            { title: "Abobo's Big Adventure", url: "https://script.google.com/macros/s/AKfycbxaJG8SPxL7EDTIJKVqtfsiGZn3YReGz1Y2Kw76c8r4SWuGhYy4Ynl8br_Yddymkj9GfQ/exec", icon: "💪" },
+            { title: "A Bonte Escape", url: "https://script.google.com/macros/s/AKfycbzVKq9ne5rcUubHPpE-HPImNY32NL2_yezOIZtxMXqYXpzK35nAzmZnJGWkJXmzsww/exec", icon: "🚪" },
+            { title: "Above Average Guy", url: "https://script.google.com/macros/s/AKfycbwHW2sQSPoAPmMFTKLjOJCN8yk-bOWq28ZSTm_I3C1pTMDydp9KHAXgTn_TTM_l3nzLAg/exec", icon: "🧍" },
+            { title: "Absorbed", url: "https://script.google.com/macros/s/AKfycby6l7gc5NeYP527oEuPWpsQlveByRmjcYwnrg4RxB5lImjVPMIyokKNWYrey83tRo_r/exec", icon: "🌀" },
+            { title: "Abuba the Alien", url: "https://script.google.com/macros/s/AKfycbwCGsJSC8Rl8gMVTMloH4E6tuqonrh-SYemixZslrOacv2GhQgU6_a0hnfeiS6IwhG60g/exec", icon: "👽" },
+            { title: "Ace Gangster", url: "https://script.google.com/macros/s/AKfycbyPJseC7UCOVNCBxq-QmhUn0pZzqAl7e4Ujkc9POkc9jCKtpXnOZYWP79H-EIGFHmk8/exec", icon: "🚬" },
+            { title: "Ace Gangster Taxi", url: "https://script.google.com/macros/s/AKfycbyf7qxduEyYXs5E7bJ7WzdN0nZsCVRxyZEiX1MOkyo7mbmvDUIrLaKuxVjse5CmtJVlNg/exec", icon: "🚕" },
+            { title: "Achievement Unlocked", url: "https://script.google.com/macros/s/AKfycbxEsaH5mWuWswPik3nCGEuPyk0b0tZ4hNsOoskqufxNRs-CIXGc5FFo5ORQAQu-ERgEJA/exec", icon: "🔓" },
+            { title: "Achievement Unlocked 2", url: "https://script.google.com/macros/s/AKfycbw0TbKNWfaP_jmOuUwViTG4wWK3zSVkmiIv9OqSiAIc9NZTZYW1xMS8YcGYBSXWPDabCw/exec", icon: "🔓" },
+            { title: "Achievement Unlocked 3", url: "https://script.google.com/macros/s/AKfycbzGgF42MoiILQLTVDjfJ7XPFqKSVu9mFIkfdt9EOQwnVP_UdFRJHrue6kjwtZGJKkvC/exec", icon: "🔓" },
+            { title: "Achilles", url: "https://script.google.com/macros/s/AKfycbyhEZPvEN2n6KlWOzOua2UjeLIxHR9AV14Il8ufTYNgvdvxpkTZxZPVSWlgwOIeba670Q/exec", icon: "🗡️" },
+            { title: "Acid Bunny", url: "https://script.google.com/macros/s/AKfycbzQinbUFpM6_ZM3lSnGIvfg3iRSHGUFPWlOpWyYKQUBnyZG5CNiqOKTQk2KT7FlUcVQ/exec", icon: "🐰" },
+            { title: "Acid Bunny 2", url: "https://script.google.com/macros/s/AKfycbwboektrWd8rlGoyqQylkwAPbrx0gGg3QvJ-bYg3Kc9IiQK-_H89RN-L6OTZK_qL2_Vrg/exec", icon: "🐰" },
+            { title: "Acid Rain", url: "https://script.google.com/macros/s/AKfycbwaVYAatmuoFi6_bwXdFxMg5a_XCAkmSJUXIlttbMEkt2M0_FuFn2s_AuEB4N4G4bTZ/exec", icon: "🧪" },
+            { title: "Action Turnip", url: "https://script.google.com/macros/s/AKfycbz2GrrcDq7T6-ypg7ObskaWqHsNbeXLhF9fj3r5RLxYYZiB0AVVPgc4Z0AakD_kSzMK/exec", icon: "🧅" },
+            { title: "Retro Bowl", url: "https://g.w3technic.com/games/retro-bowl/", icon: "🏈" },
+            { title: "Stickman Hook", url: "https://monkeymart6x.io/stickman-hook.embed", icon: "🪝" },
+            { title: "Slope", url: "https://slope-unblocked-10x.github.io/action-games/slope/", icon: "⛷️" }
+        ];
 
-  function closeGame() {
-    document.getElementById('gameModal').classList.remove('open');
-    document.getElementById('gameFrame').src = '';
-  }
+        // --- CORE LOGIC ---
+        window.addEventListener('load', () => {
+            // Boot sequence
+            setTimeout(() => {
+                document.getElementById('boot-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('boot-screen').style.display = 'none';
+                    document.getElementById('desktop').style.display = 'block';
+                    initStarfield();
+                    updateClock();
+                    openLibrary(); // Open library by default
+                }, 1000);
+            }, 3000);
+        });
 
-  function toggleCloaker() {
-    document.body.classList.toggle('cloaker-classroom');
-    document.querySelector('.cloaker-btn').textContent = document.body.classList.contains('cloaker-classroom') ? '👓 Normal' : '🎭 Cloaker';
-  }
+        // --- STARFIELD BACKGROUND ---
+        function initStarfield() {
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+            
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            
+            window.addEventListener('resize', resize);
+            resize();
 
-  document.getElementById('searchInput').addEventListener('input', renderGames);
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeGame();
-  });
+            for(let i=0; i<200; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    speed: Math.random() * 0.5 + 0.1
+                });
+            }
 
-  renderGames();
-</script>
+            function animate() {
+                ctx.clearRect(0,0, canvas.width, canvas.height);
+                ctx.fillStyle = '#d4a5ff';
+                stars.forEach(s => {
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+                    ctx.fill();
+                    s.y += s.speed;
+                    if(s.y > canvas.height) s.y = 0;
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
 
+        // --- WINDOW MANAGER ---
+        let zIndexCounter = 100;
+
+        function createWindow(title, contentHTML) {
+            const id = 'win-' + Math.random().toString(36).substr(2, 9);
+            const win = document.createElement('div');
+            win.className = 'window';
+            win.id = id;
+            win.style.top = '100px';
+            win.style.left = '100px';
+            win.style.zIndex = ++zIndexCounter;
+
+            win.innerHTML = `
+                <div class="window-header" onmousedown="focusWindow('${id}')">
+                    <span class="window-title">${title}</span>
+                    <div class="window-controls">
+                        <div class="control-btn btn-close" onclick="closeWindow('${id}')"></div>
+                    </div>
+                </div>
+                <div class="window-content">
+                    ${contentHTML}
+                </div>
+            `;
+
+            document.getElementById('window-layer').appendChild(win);
+            makeDraggable(win);
+            return id;
+        }
+
+        function focusWindow(id) {
+            document.getElementById(id).style.zIndex = ++zIndexCounter;
+        }
+
+        function closeWindow(id) {
+            const win = document.getElementById(id);
+            win.style.transform = 'scale(0.9)';
+            win.style.opacity = '0';
+            setTimeout(() => win.remove(), 200);
+        }
+
+        function makeDraggable(el) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            const header = el.querySelector('.window-header');
+            
+            header.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+                focusWindow(el.id);
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                el.style.top = (el.offsetTop - pos2) + "px";
+                el.style.left = (el.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        // --- GAME PLAYER LOGIC ---
+        function openGame(title, url) {
+            const modal = document.getElementById('game-modal');
+            const frame = document.getElementById('game-frame');
+            const titleEl = document.getElementById('modal-game-title');
+            
+            titleEl.innerText = title.toUpperCase();
+            frame.src = url;
+            modal.style.display = 'flex';
+        }
+
+        function closeGame() {
+            const modal = document.getElementById('game-modal');
+            const frame = document.getElementById('game-frame');
+            frame.src = '';
+            modal.style.display = 'none';
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape') closeGame();
+        });
+
+        // --- LIBRARY RENDERER ---
+        function openLibrary() {
+            // Check if already open
+            if(document.querySelector('.game-grid')) return;
+
+            let gridHTML = `<div class="game-grid">`;
+            games.forEach(game => {
+                gridHTML += `
+                    <div class="game-card" onclick="openGame('${game.title}', '${game.url}')">
+                        <span class="game-icon">${game.icon}</span>
+                        <span class="game-title">${game.title}</span>
+                    </div>
+                `;
+            });
+            gridHTML += `</div>`;
+
+            createWindow('Game Library', gridHTML);
+        }
+
+        // --- UTILS ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+            setTimeout(updateClock, 1000);
+        }
+
+    </script>
 </body>
 </html>
