@@ -1,579 +1,1046 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Cloaker Metadata -->
-    <title>My Drive - Google Drive</title>
-    <meta name="description" content="Access your files anywhere.">
-    <meta name="keywords" content="drive, google, storage, files">
-    
-    <style>
-        /* --- DESIGN TOKENS & VARIABLES --- */
-        :root {
-            --bg-main: #0a0a0c;
-            --accent-blue: #3a86ff;
-            --glass-bg: rgba(25, 25, 28, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #f0f0f2;
-            --text-dim: #a0a0ab;
-            --window-radius: 16px;
-            --card-radius: 12px;
-            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
-            --transition-smooth: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MonoOS — Unblocked Game Hub</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;--surface:#0a0a0a;--surface2:#111;--surface3:#1a1a1a;
+  --border:#2a2a2a;--border2:#333;--text:#fff;--text2:#aaa;--text3:#666;
+  --accent:#fff;--glow:rgba(255,255,255,0.08);
+  --font:'Segoe UI',system-ui,sans-serif
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--font);color:var(--text)}
 
-        /* --- GLOBAL RESET --- */
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            margin: 0;
-            padding: 0;
-            -webkit-font-smoothing: antialiased;
-        }
+/* ═══════════════════════════════════ STARFIELD ═══ */
+#stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-        body, html {
-            height: 100%;
-            overflow: hidden;
-            background: var(--bg-main);
-            color: var(--text-main);
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
+/* ═══════════════════════════════════ BOOT SEQUENCE ═══ */
+#boot{position:fixed;inset:0;z-index:100;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.boot-screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 0.6s}
+.boot-screen.active{display:flex}
+.boot-screen.visible{opacity:1}
 
-        /* --- LAYOUT COMPONENTS --- */
-        
-        /* 1. Boot Screen */
-        #boot-screen {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.8s ease;
-        }
+/* CRT Effect */
+.crt::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);pointer-events:none;z-index:10}
+.crt::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.8) 100%);pointer-events:none;z-index:11}
+.scanline-noise{position:absolute;inset:0;opacity:0.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");z-index:12;pointer-events:none;animation:noise 0.1s steps(1) infinite}
+@keyframes noise{0%{background-position:0 0}25%{background-position:-50px 25px}50%{background-position:25px -50px}75%{background-position:-75px 50px}100%{background-position:50px -75px}}
 
-        .boot-logo {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--accent-blue), #8338ec);
-            border-radius: 14px;
-            margin-bottom: 24px;
-            position: relative;
-        }
+/* Boot Screen 1 — DOS Era */
+#boot1{background:#000;font-family:'Courier New',monospace;padding:40px}
+.dos-text{color:#aaa;font-size:13px;line-height:1.8;text-align:left;max-width:600px}
+.dos-text .blink{animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.dos-bar{margin-top:20px;height:24px;background:#0000aa;color:#fff;font-family:'Courier New',monospace;font-size:13px;display:flex;justify-content:center;align-items:center;border-top:2px solid #55f;border-bottom:2px solid #55f}
 
-        .boot-loader {
-            width: 140px;
-            height: 2px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 2px;
-            overflow: hidden;
-        }
+/* Boot Screen 2 — Win 9x Style */
+#boot2{background:#008080}
+.win9x-window{background:#c0c0c0;border:3px solid;border-color:#fff #808080 #808080 #fff;padding:0;width:360px}
+.win9x-title{background:linear-gradient(90deg,#000080,#1084d0);color:#fff;font-size:12px;font-weight:bold;padding:3px 6px;display:flex;justify-content:space-between;align-items:center;font-family:'Courier New',monospace}
+.win9x-body{padding:20px;font-size:12px;font-family:'Courier New',monospace}
+.win9x-progress{height:20px;background:#fff;border:2px inset #808080;margin:10px 0;overflow:hidden}
+.win9x-fill{height:100%;background:#000080;width:0;transition:width 2s}
+.win9x-btn{background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;padding:4px 16px;font-size:11px;font-family:'Courier New',monospace;cursor:default}
 
-        .boot-loader-fill {
-            width: 0%;
-            height: 100%;
-            background: var(--text-main);
-            animation: bootProgress 2.5s forwards ease-in-out;
-        }
+/* Boot Screen 3 — Win XP-ish */
+#boot3{background:#000}
+.xp-logo{font-size:52px;font-weight:300;letter-spacing:-2px;color:#fff;font-family:'Segoe UI',sans-serif;margin-bottom:8px}
+.xp-sub{font-size:13px;color:#aaa;margin-bottom:40px;letter-spacing:4px;text-transform:uppercase}
+.xp-bar-track{width:200px;height:6px;background:#222;border-radius:3px;overflow:hidden}
+.xp-bar-fill{height:100%;background:#fff;border-radius:3px;width:0;animation:xpbar 3s ease forwards}
+@keyframes xpbar{0%{width:0}100%{width:100%}}
+.dots{display:flex;gap:6px;margin-top:20px}
+.dot{width:8px;height:8px;border-radius:50%;background:#333;animation:dotpulse 1.4s ease-in-out infinite}
+.dot:nth-child(1){animation-delay:0s}
+.dot:nth-child(2){animation-delay:0.2s}
+.dot:nth-child(3){animation-delay:0.4s}
+@keyframes dotpulse{0%,80%,100%{background:#333}40%{background:#fff}}
 
-        @keyframes bootProgress { 100% { width: 100%; } }
+/* Boot Screen 4 — Win 10/Modern */
+#boot4{background:#000}
+.win10-logo{width:64px;height:64px;display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:32px}
+.win10-logo div{background:#fff;border-radius:2px;animation:logofade 0.5s ease both}
+.win10-logo div:nth-child(1){animation-delay:0.1s}
+.win10-logo div:nth-child(2){animation-delay:0.2s}
+.win10-logo div:nth-child(3){animation-delay:0.3s}
+.win10-logo div:nth-child(4){animation-delay:0.4s}
+@keyframes logofade{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+.spin-ring{width:32px;height:32px;border:3px solid #222;border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-        /* 2. Desktop */
-        #desktop {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle at 50% 50%, #1c1c21 0%, #0a0a0c 100%);
-            display: none; /* Shown after boot */
-        }
+/* Boot Final — MonoOS Splash */
+#boot5{background:#000}
+.mono-splash-logo{font-size:72px;font-weight:200;letter-spacing:-3px;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;margin-bottom:4px}
+.mono-splash-sub{font-size:11px;letter-spacing:8px;color:#555;text-transform:uppercase;margin-bottom:48px}
+.mono-version{font-size:11px;color:#333;position:absolute;bottom:40px;letter-spacing:2px}
+.fade-to-desktop{animation:fadeToDesktop 1.5s ease forwards}
+@keyframes fadeToDesktop{to{opacity:0;transform:scale(1.05)}}
 
-        canvas#starfield {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            opacity: 0.4;
-        }
+/* ═══════════════════════════════════ DESKTOP ═══ */
+#desktop{position:fixed;inset:0;z-index:1;display:none;flex-direction:column;opacity:0;transition:opacity 1s}
+#desktop.visible{opacity:1}
 
-        /* 3. Taskbar (Modern Floating Dock) */
-        #taskbar {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            height: 58px;
-            padding: 0 12px;
-            background: rgba(20, 20, 23, 0.8);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 1000;
-            box-shadow: var(--shadow-lg);
-        }
+/* Taskbar */
+#taskbar{height:44px;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:50;flex-shrink:0}
+.tb-logo{font-size:15px;font-weight:300;letter-spacing:-0.5px;color:#fff;white-space:nowrap;margin-right:4px}
+.tb-sep{width:1px;height:20px;background:var(--border2);flex-shrink:0}
+.tb-nav{display:flex;gap:2px;flex:1}
+.tb-btn{background:transparent;border:none;color:var(--text2);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--font);transition:all 0.15s;white-space:nowrap}
+.tb-btn:hover{background:var(--surface3);color:#fff}
+.tb-btn.active{background:var(--surface2);color:#fff;border:1px solid var(--border)}
+.tb-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+#clock{font-size:12px;color:var(--text2);font-family:'Courier New',monospace;white-space:nowrap}
+.search-wrap{position:relative}
+#search{background:var(--surface2);border:1px solid var(--border);color:#fff;padding:5px 12px 5px 32px;border-radius:6px;font-size:12px;font-family:var(--font);outline:none;width:180px;transition:all 0.2s}
+#search:focus{border-color:var(--border2);width:220px;background:var(--surface3)}
+#search::placeholder{color:var(--text3)}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
 
-        .dock-item {
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            position: relative;
-            font-size: 1.4rem;
-        }
+/* Main content area */
+#content{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
 
-        .dock-item:hover {
-            background: rgba(255,255,255,0.08);
-            transform: translateY(-4px);
-        }
+/* Section panels */
+.section{display:none;flex:1;overflow:hidden}
+.section.active{display:flex;flex-direction:column}
 
-        .dock-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            width: 4px;
-            height: 4px;
-            background: var(--accent-blue);
-            border-radius: 50%;
-        }
+/* ═══════════════════════════════════ HOME SECTION ═══ */
+#sec-home{padding:20px 24px;gap:16px;overflow-y:auto}
+.home-grid{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto;gap:16px}
+.panel{background:rgba(10,10,10,0.8);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:10px;padding:16px;transition:border-color 0.2s}
+.panel:hover{border-color:var(--border2)}
+.panel-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+.featured-game{display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;margin-bottom:8px}
+.featured-game:hover{border-color:#fff;background:var(--surface3)}
+.game-icon-lg{width:48px;height:48px;background:var(--surface3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:1px solid var(--border)}
+.featured-info h3{font-size:13px;font-weight:500;margin-bottom:2px}
+.featured-info p{font-size:11px;color:var(--text3)}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-card{background:var(--surface2);border-radius:8px;padding:12px;border:1px solid var(--border);text-align:center}
+.stat-val{font-size:22px;font-weight:200;color:#fff}
+.stat-lab{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;margin-top:2px}
+.recent-list{display:flex;flex-direction:column;gap:6px}
+.recent-item{display:flex;align-items:center;gap:10px;padding:8px;background:var(--surface2);border-radius:7px;border:1px solid var(--border);cursor:pointer;transition:all 0.15s}
+.recent-item:hover{border-color:#555}
+.recent-icon{width:32px;height:32px;background:var(--surface3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.recent-info{flex:1;min-width:0}
+.recent-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-cat{font-size:10px;color:var(--text3)}
+.news-item{padding:10px 0;border-bottom:1px solid var(--border)}
+.news-item:last-child{border-bottom:none}
+.news-tag{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.news-title{font-size:12px;color:var(--text2);line-height:1.5}
+.terminal-widget{font-family:'Courier New',monospace;font-size:11px;color:#0f0;background:#000;border-radius:8px;padding:12px;border:1px solid #0a2a0a;height:100%;overflow:hidden}
+.term-line{margin-bottom:3px;opacity:0;animation:termfade 0.1s forwards}
+.term-prompt{color:#0f0}
+.term-out{color:#888}
+@keyframes termfade{to{opacity:1}}
 
-        .dock-separator {
-            width: 1px;
-            height: 24px;
-            background: var(--glass-border);
-            margin: 0 4px;
-        }
+/* ═══════════════════════════════════ GAMES SECTION ═══ */
+#sec-games{padding:20px 24px;overflow-y:auto;flex-direction:column;gap:16px}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filter-btn{background:transparent;border:1px solid var(--border);color:var(--text2);padding:5px 14px;border-radius:20px;cursor:pointer;font-size:11px;font-family:var(--font);transition:all 0.15s;white-space:nowrap}
+.filter-btn:hover{border-color:#fff;color:#fff}
+.filter-btn.active{background:#fff;color:#000;border-color:#fff}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.game-card{background:rgba(10,10,10,0.8);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative;group}
+.game-card:hover{border-color:#fff;transform:translateY(-2px)}
+.game-card:hover .game-overlay{opacity:1}
+.game-thumb{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:36px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.game-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;backdrop-filter:blur(4px)}
+.play-btn{background:#fff;color:#000;border:none;padding:8px 20px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}
+.game-info{padding:10px 12px}
+.game-name{font-size:12px;font-weight:500;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.game-cat{font-size:10px;color:var(--text3)}
 
-        .clock-widget {
-            padding: 0 12px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-main);
-        }
+/* ═══════════════════════════════════ GAME EMBED ═══ */
+#game-viewer{position:fixed;inset:0;z-index:90;background:#000;display:none;flex-direction:column}
+#game-viewer.open{display:flex}
+#game-topbar{height:36px;background:rgba(10,10,10,0.95);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0}
+#game-title{font-size:12px;color:var(--text2);flex:1}
+.gv-btn{background:transparent;border:1px solid var(--border);color:var(--text2);padding:4px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-family:var(--font);transition:all 0.15s}
+.gv-btn:hover{border-color:#fff;color:#fff}
+#game-frame{flex:1;border:none;width:100%;background:#111}
+.loading-frame{position:absolute;inset:36px 0 0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#000}
+.loading-frame .spin-ring{width:40px;height:40px;border-width:3px}
+.loading-frame p{font-size:12px;color:var(--text3)}
 
-        /* 4. Windows System */
-        .window {
-            position: absolute;
-            background: var(--glass-bg);
-            backdrop-filter: blur(30px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--window-radius);
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            animation: winFocus 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            min-width: 400px;
-        }
+/* ═══════════════════════════════════ TERMINAL SECTION ═══ */
+#sec-terminal{background:#000;font-family:'Courier New',monospace}
+#terminal-body{flex:1;padding:20px 24px;overflow-y:auto;font-size:13px;color:#0f0;line-height:1.7}
+.t-prompt{color:#0f0}
+.t-out{color:#888}
+.t-err{color:#f44}
+.t-info{color:#0af}
+#terminal-input-row{display:flex;align-items:center;padding:8px 24px;border-top:1px solid #0a2a0a;background:#000;gap:8px}
+#t-prompt-label{color:#0f0;font-family:'Courier New',monospace;font-size:13px;white-space:nowrap}
+#t-input{background:transparent;border:none;color:#0f0;font-family:'Courier New',monospace;font-size:13px;flex:1;outline:none;caret-color:#0f0}
 
-        @keyframes winFocus { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+/* ═══════════════════════════════════ SETTINGS SECTION ═══ */
+#sec-settings{padding:24px;overflow-y:auto;gap:20px}
+.setting-group{background:rgba(10,10,10,0.8);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.sg-head{padding:14px 16px;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+.sg-row{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);gap:16px}
+.sg-row:last-child{border-bottom:none}
+.sg-label{flex:1;font-size:13px}
+.sg-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.toggle{width:40px;height:22px;background:var(--surface3);border-radius:11px;cursor:pointer;position:relative;border:1px solid var(--border);transition:background 0.2s;flex-shrink:0}
+.toggle.on{background:#fff}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;background:#555;border-radius:50%;top:2px;left:2px;transition:all 0.2s}
+.toggle.on::after{left:20px;background:#000}
+.theme-btns{display:flex;gap:6px}
+.theme-btn{padding:5px 12px;border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:11px;background:transparent;color:var(--text2);font-family:var(--font);transition:all 0.15s}
+.theme-btn:hover,.theme-btn.active{border-color:#fff;color:#fff;background:var(--surface3)}
 
-        .window-header {
-            height: 48px;
-            padding: 0 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.03);
-            cursor: default;
-        }
+/* ═══════════════════════════════════ CONTEXT MENU ═══ */
+#ctx-menu{position:fixed;background:rgba(15,15,15,0.98);backdrop-filter:blur(20px);border:1px solid var(--border2);border-radius:8px;padding:4px;z-index:200;display:none;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,0.8)}
+.ctx-item{padding:8px 14px;font-size:12px;color:var(--text2);cursor:pointer;border-radius:5px;transition:all 0.1s}
+.ctx-item:hover{background:var(--surface3);color:#fff}
+.ctx-sep{height:1px;background:var(--border);margin:4px 0}
 
-        .window-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-dim);
-            letter-spacing: 0.3px;
-        }
+/* ═══════════════════════════════════ NOTIFICATION ═══ */
+#notif{position:fixed;bottom:60px;right:20px;background:rgba(20,20,20,0.98);border:1px solid var(--border2);border-radius:10px;padding:14px 18px;font-size:12px;color:#fff;z-index:300;display:none;max-width:260px;backdrop-filter:blur(20px);animation:slideIn 0.3s ease}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+#notif .n-title{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
 
-        .window-controls {
-            display: flex;
-            gap: 12px;
-        }
+/* ═══════════════════════════════════ SCROLL ═══ */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:#555}
 
-        .win-btn {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .win-btn:hover { opacity: 0.8; }
-        .win-close { background: #ff5f57; }
-        .win-min { background: #febc2e; }
+/* ═══════════════════════════════════ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .home-grid{grid-template-columns:1fr 1fr}
+  .tb-nav .tb-btn:not(.tb-btn-show){display:none}
+}
+@media(max-width:600px){
+  .home-grid{grid-template-columns:1fr}
+  #search{width:120px}
+}
 
-        .window-content {
-            flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-            max-height: 75vh;
-        }
-
-        /* 5. Game Library Components */
-        .library-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 20px;
-        }
-
-        .game-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            padding: 20px 10px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid transparent;
-            border-radius: var(--card-radius);
-            transition: var(--transition-smooth);
-            cursor: pointer;
-        }
-
-        .game-card:hover {
-            background: rgba(255,255,255,0.06);
-            border-color: var(--glass-border);
-            transform: translateY(-2px);
-        }
-
-        .game-card .icon {
-            font-size: 2.2rem;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-        }
-
-        .game-card .name {
-            font-size: 0.75rem;
-            font-weight: 500;
-            text-align: center;
-            color: var(--text-dim);
-            line-height: 1.2;
-        }
-
-        /* 6. Game Modal Player */
-        #modal-player {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 2000;
-            display: none;
-            flex-direction: column;
-        }
-
-        .modal-bar {
-            height: 44px;
-            background: #111;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            border-bottom: 1px solid #222;
-        }
-
-        .modal-bar .title { font-size: 0.8rem; font-weight: 600; color: var(--text-dim); }
-        .modal-bar .close-btn { color: #ff5f57; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
-
-        #game-frame { flex: 1; border: none; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-
-    </style>
+/* Theme variations */
+body.theme-green{--text:#0f0;--border:#0a2a0a;--border2:#155215;--surface2:#000d00;--surface3:#011001}
+body.theme-amber{--text:#f90;--border:#2a1a00;--border2:#3a2500;--surface2:#0d0800;--surface3:#110a00}
+</style>
 </head>
 <body>
 
-    <!-- BOOT SYSTEM -->
-    <div id="boot-screen">
-        <div class="boot-logo"></div>
-        <div class="boot-loader">
-            <div class="boot-loader-fill"></div>
+<!-- STARFIELD -->
+<canvas id="stars-canvas"></canvas>
+
+<!-- BOOT SEQUENCE -->
+<div id="boot">
+
+  <!-- Screen 1: DOS era -->
+  <div class="boot-screen crt" id="boot1">
+    <div class="scanline-noise"></div>
+    <div class="dos-text" id="dos-output"></div>
+    <div class="dos-bar">Microsoft(R) MonoOS Version 1.0</div>
+  </div>
+
+  <!-- Screen 2: Win 9x -->
+  <div class="boot-screen" id="boot2" style="background:#008080">
+    <div class="win9x-window">
+      <div class="win9x-title">
+        <span>Starting MonoOS...</span>
+        <span>■</span>
+      </div>
+      <div class="win9x-body">
+        <p style="margin-bottom:8px">MonoOS is starting up...</p>
+        <p style="color:#555;font-size:11px;margin-bottom:8px">Performing system integrity check</p>
+        <div class="win9x-progress"><div class="win9x-fill" id="win9x-bar"></div></div>
+        <p id="win9x-status" style="font-size:11px;color:#000080">Initializing...</p>
+        <div style="display:flex;justify-content:center;margin-top:16px">
+          <div class="win9x-btn">Cancel</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 3: WinXP era -->
+  <div class="boot-screen" id="boot3" style="background:#000">
+    <div class="xp-logo">MonoOS</div>
+    <div class="xp-sub">Professional Edition</div>
+    <div class="xp-bar-track"><div class="xp-bar-fill"></div></div>
+    <div class="dots" id="xp-dots">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+
+  <!-- Screen 4: Modern loading -->
+  <div class="boot-screen" id="boot4" style="background:#000">
+    <div class="win10-logo">
+      <div></div><div></div><div></div><div></div>
+    </div>
+    <div class="spin-ring"></div>
+    <div style="font-size:12px;color:#333;letter-spacing:3px;text-transform:uppercase">Loading MonoOS</div>
+  </div>
+
+  <!-- Screen 5: MonoOS Splash -->
+  <div class="boot-screen" id="boot5" style="background:#000">
+    <div class="mono-splash-logo">MonoOS</div>
+    <div class="mono-splash-sub">Unblocked Game Hub</div>
+    <div class="xp-bar-track" style="width:300px"><div class="xp-bar-fill"></div></div>
+    <div class="mono-version">v2.0.1 — MONOLITHICS CORP. 2025</div>
+  </div>
+
+</div>
+
+<!-- DESKTOP -->
+<div id="desktop">
+
+  <!-- Taskbar -->
+  <div id="taskbar">
+    <div class="tb-logo">⬛ MonoOS</div>
+    <div class="tb-sep"></div>
+    <div class="tb-nav">
+      <button class="tb-btn active tb-btn-show" onclick="showSection('home')">Home</button>
+      <button class="tb-btn tb-btn-show" onclick="showSection('games')">Games</button>
+      <button class="tb-btn tb-btn-show" onclick="showSection('terminal')">Terminal</button>
+      <button class="tb-btn tb-btn-show" onclick="showSection('settings')">Settings</button>
+    </div>
+    <div class="tb-right">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input id="search" type="text" placeholder="Search games..." oninput="filterGames(this.value)">
+      </div>
+      <div id="clock">--:-- --</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div id="content">
+
+    <!-- HOME -->
+    <div class="section active" id="sec-home">
+      <div class="home-grid">
+
+        <!-- Featured -->
+        <div class="panel" style="grid-column:1/3">
+          <div class="panel-title">Featured Games</div>
+          <div id="featured-list"></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="panel">
+          <div class="panel-title">Library Stats</div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-val" id="stat-total">0</div><div class="stat-lab">Total Games</div></div>
+            <div class="stat-card"><div class="stat-val" id="stat-cats">0</div><div class="stat-lab">Categories</div></div>
+            <div class="stat-card"><div class="stat-val" id="stat-new">12</div><div class="stat-lab">Added Today</div></div>
+            <div class="stat-card"><div class="stat-val">∞</div><div class="stat-lab">Hours Waiting</div></div>
+          </div>
+        </div>
+
+        <!-- Recent -->
+        <div class="panel" style="grid-column:1/2">
+          <div class="panel-title">Recently Played</div>
+          <div class="recent-list" id="recent-list">
+            <div style="font-size:12px;color:var(--text3);padding:8px 0">No games played yet. Click a game to start!</div>
+          </div>
+        </div>
+
+        <!-- Terminal widget -->
+        <div class="panel" style="grid-column:2/4">
+          <div class="panel-title">System Terminal</div>
+          <div class="terminal-widget" id="term-widget"></div>
+        </div>
+
+        <!-- News -->
+        <div class="panel" style="grid-column:1/2">
+          <div class="panel-title">Game News</div>
+          <div class="news-item"><div class="news-tag">Update</div><div class="news-title">Over 100 unblocked games now available in the library</div></div>
+          <div class="news-item"><div class="news-tag">Feature</div><div class="news-title">Instant game loading — no waiting, no limits</div></div>
+          <div class="news-item"><div class="news-tag">Tip</div><div class="news-title">Try the terminal — type "help" for secret commands</div></div>
+        </div>
+
+      </div>
     </div>
 
-    <!-- MAIN OS DESKTOP -->
-    <div id="desktop">
-        <canvas id="starfield"></canvas>
-        
-        <div id="window-layer"></div>
-
-        <div id="taskbar">
-            <div class="dock-item" onclick="WindowManager.openLibrary()" title="Game Library">📁</div>
-            <div class="dock-item" onclick="WindowManager.openAbout()" title="System Info">ℹ️</div>
-            <div class="dock-separator"></div>
-            <div id="active-apps" style="display:flex; gap:8px;"></div>
-            <div class="clock-widget" id="clock-display">12:00 PM</div>
-        </div>
+    <!-- GAMES -->
+    <div class="section" id="sec-games">
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="setFilter('all',this)">All Games</button>
+        <button class="filter-btn" onclick="setFilter('action',this)">Action</button>
+        <button class="filter-btn" onclick="setFilter('puzzle',this)">Puzzle</button>
+        <button class="filter-btn" onclick="setFilter('arcade',this)">Arcade</button>
+        <button class="filter-btn" onclick="setFilter('shooter',this)">Shooter</button>
+        <button class="filter-btn" onclick="setFilter('strategy',this)">Strategy</button>
+        <button class="filter-btn" onclick="setFilter('sports',this)">Sports</button>
+        <button class="filter-btn" onclick="setFilter('racing',this)">Racing</button>
+        <button class="filter-btn" onclick="setFilter('idle',this)">Idle</button>
+      </div>
+      <div class="games-grid" id="games-grid"></div>
     </div>
 
-    <!-- GAME MODAL -->
-    <div id="modal-player">
-        <div class="modal-bar">
-            <div class="title" id="modal-title">PLAYING...</div>
-            <div class="close-btn" onclick="GamePlayer.close()">CLOSE ✖</div>
-        </div>
-        <iframe id="game-frame" src=""></iframe>
+    <!-- TERMINAL -->
+    <div class="section" id="sec-terminal">
+      <div id="terminal-body"></div>
+      <div id="terminal-input-row">
+        <span id="t-prompt-label">guest@monoos:~$</span>
+        <input id="t-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="">
+      </div>
     </div>
 
-    <script>
-        /**
-         * STARS OS - MODULAR CORE
-         */
+    <!-- SETTINGS -->
+    <div class="section" id="sec-settings">
+      <div class="setting-group">
+        <div class="sg-head">Appearance</div>
+        <div class="sg-row">
+          <div><div class="sg-label">Color Theme</div><div class="sg-desc">Choose your color scheme</div></div>
+          <div class="theme-btns">
+            <button class="theme-btn active" onclick="setTheme('default',this)">Mono</button>
+            <button class="theme-btn" onclick="setTheme('green',this)">Matrix</button>
+            <button class="theme-btn" onclick="setTheme('amber',this)">Amber</button>
+          </div>
+        </div>
+        <div class="sg-row">
+          <div><div class="sg-label">Starfield Animation</div><div class="sg-desc">Animated star background</div></div>
+          <div class="toggle on" id="tog-stars" onclick="toggleSetting('stars',this)"></div>
+        </div>
+        <div class="sg-row">
+          <div><div class="sg-label">Glassmorphism Effects</div><div class="sg-desc">Blur and transparency effects</div></div>
+          <div class="toggle on" id="tog-glass" onclick="toggleSetting('glass',this)"></div>
+        </div>
+      </div>
+      <div class="setting-group">
+        <div class="sg-head">System</div>
+        <div class="sg-row">
+          <div><div class="sg-label">Performance Mode</div><div class="sg-desc">Reduce animations for Chromebooks</div></div>
+          <div class="toggle" id="tog-perf" onclick="toggleSetting('perf',this)"></div>
+        </div>
+        <div class="sg-row">
+          <div><div class="sg-label">Sound Effects</div><div class="sg-desc">UI click and hover sounds</div></div>
+          <div class="toggle" id="tog-sound" onclick="toggleSetting('sound',this)"></div>
+        </div>
+      </div>
+      <div class="setting-group">
+        <div class="sg-head">About MonoOS</div>
+        <div class="sg-row"><div><div class="sg-label">Version</div><div class="sg-desc">v2.0.1 — Monolithics Corp. 2025</div></div></div>
+        <div class="sg-row"><div><div class="sg-label">Total Games</div><div class="sg-desc" id="about-games">Loading...</div></div></div>
+        <div class="sg-row">
+          <div><div class="sg-label">Replay Boot Sequence</div><div class="sg-desc">Restart the boot animation</div></div>
+          <button class="theme-btn" onclick="location.reload()">Restart</button>
+        </div>
+      </div>
+    </div>
 
-        const GAME_DATA = [
-            { title: "1 On 1 Basketball", url: "https://script.google.com/macros/s/AKfycbwDVKSBVuNK4axJUnLuqHJHWh7EubO4icUJldVaUPoVqjsalm2SB9mCKg7x6f0rU7O6OA/exec", icon: "🏀" },
-            { title: "1 On 1 Football", url: "https://script.google.com/macros/s/AKfycbwDQPy94m3iDQqxeBLkyAH8rWoNeunk0TyuS7j5qE6hSk3o3j6eoU7z5uy_qhgsKeKn/exec", icon: "🏈" },
-            { title: "1 On 1 Hockey", url: "https://script.google.com/macros/s/AKfycbyzYs6pQLcgMsjNZ1-YovjUPrruPQtfNcOjaOCMv0KpuRdjd05-u-2owQoardtV62a1/exec", icon: "🏒" },
-            { title: "1 On 1 Soccer", url: "https://script.google.com/macros/s/AKfycbxJ3oet4bnNqQK_nqPo6KSwPlvIMR448__kEYKx_WN-QbncNc98PEc-qaFme7l2tbKH/exec", icon: "⚽" },
-            { title: "1 On 1 Soccer Brazil", url: "https://script.google.com/macros/s/AKfycbxswxjq_hbSYU7FWSj6zgU5GBHGCS_axxnAf6Xu-_yQj_zyINBaEY9HNhE-3N3sBJeO/exec", icon: "🇧🇷" },
-            { title: "1 On 1 Tennis", url: "https://script.google.com/macros/s/AKfycbwq66mQrL2jfU72rfIYu7h31dGJbSmmvbbkfEF21eOb0WX2UjJyZJq7QHiGEmAMBW2-rQ/exec", icon: "🎾" },
-            { title: "1 Will Survive 2", url: "https://script.google.com/macros/s/AKfycbxwE_8QNir8i6xPqvqO99VE9Kw5DGmtvu-IRq4fL4vC1uHFDB0WEo3HG_buBW1hDqJDTA/exec", icon: "🌋" },
-            { title: "1001 Arabian Nights", url: "https://script.google.com/macros/s/AKfycbz_t7Vm2oO4vmgNYZ4uZG87maDj8Lcg5SmpMVV9rGl3irskmuLBttgpaRhuq5E5gBwDBQ/exec", icon: "🧞" },
-            { title: "2 Player Chess", url: "https://script.google.com/macros/s/AKfycbwD4aYk8804rFEa2GleUacBH110qmzS8bz-wHnRTTigY2HkE3iafHYLRCkH0nUGc_oA/exec", icon: "♟️" },
-            { title: "2-Player Dino Run", url: "https://script.google.com/macros/s/AKfycbzblFS2xfWNWEfzVJvHHI-t7SiXBaK0M1_rSxf3dcaEFyCUs8eKVc9KEma-a1cRwy2A/exec", icon: "🦖" },
-            { title: "2D World", url: "https://script.google.com/macros/s/AKfycbyV7qTUXOBtYWcSIvoPN2cnwVrdZ6dU_01TBF8CIgoMDzqh9gxkeX0EvCkKJoKMjHYz/exec", icon: "🌎" },
-            { title: "2048", url: "https://script.google.com/macros/s/AKfycbwgo9fzGlgbzqpBKfXrw7gGGvg8cYPPL-ycgd_y9jKePSDVnk_zr_keYn8v-0eUJQd5/exec", icon: "🔢" },
-            { title: "2048 Legend", url: "https://script.google.com/macros/s/AKfycbzbZssyAtjMWY1j2C76xHryiswAJgxLWh6C5c7XS6cofZZrq7qvFuDURSchkl24315F/exec", icon: "🏆" },
-            { title: "2048 Shoot", url: "https://script.google.com/macros/s/AKfycbw83uxYRr534DXrzIHS5T6Q5AeQtQnMdkk8Dxxo3i732YYOm6pr6LqO730wHogB7sI/exec", icon: "🔫" },
-            { title: "2048 X2 Legends", url: "https://script.google.com/macros/s/AKfycbzGAUWvsqZc6WqL_-8FZe8cAAyyzs1cLKK1sDkE6EyyOMMXO56tPJqg-QcNTdLSS31i/exec", icon: "💎" },
-            { title: "3 Pandas", url: "https://script.google.com/macros/s/AKfycbyCj8rm46awBKgGEsThfN6TwbL_WEfzx2xfLhXPaZNxDBBuD-v4uGQvcXusNlpuk8lg/exec", icon: "🐼" },
-            { title: "3 Pandas 2 Night", url: "https://script.google.com/macros/s/AKfycbw6oTknzPj4n1yIKixw9uxxP3042RdoXTCp61Pg6duI5oa6PNamciA6vtw0ke4-Izk5uA/exec", icon: "🌙" },
-            { title: "3 Pandas in Brazil", url: "https://script.google.com/macros/s/AKfycbxVytKEnnhTzSm067_cR6yzq38M2tDoLhVCPFqOfkPpuk9n1arzIaEHGfDn-osZJwQx/exec", icon: "🦜" },
-            { title: "3 Pandas in Fantasy", url: "https://script.google.com/macros/s/AKfycbzwYX3JMCHF0sl5OJp2FvJdNEcHlhwKGhYUQ6erBMhH9bgVrz2nzMtLHpeeGDYDJd_U/exec", icon: "⚔️" },
-            { title: "3 Pandas in Japan", url: "https://script.google.com/macros/s/AKfycbxQvFLpVLkI_lmW4aeGRhwa8PdwSg_4YrrenFpMTJxkOFMm292ToUyp1BE1r7DYmzJ6/exec", icon: "⛩️" },
-            { title: "3 Little Heroes", url: "https://script.google.com/macros/s/AKfycbzQIs0XBlZzFopZXscM5z46uk3WEZKIXRXsB8Az5RNVv4djCc8ea5wF5NkPcElEOPE0/exec", icon: "🛡️" },
-            { title: "3 on 3 Hockey", url: "https://script.google.com/macros/s/AKfycbzuVw8Y9bVL0oph4sEjz1W_vo2BPIW_vZSMLH9gj1k12JeF4V6lmCbosEufksUp4QPkag/exec", icon: "⛸️" },
-            { title: "3 Slices", url: "https://script.google.com/macros/s/AKfycbwc8tQNjhcp1UvhLlIm2xn0eWosHu36CInDe9hXwDc__kbXB1GwneLwGSlGLMx2hxAE/exec", icon: "🍕" },
-            { title: "3 Slices 2", url: "https://script.google.com/macros/s/AKfycbx_WwiQFRH389oDI9eTrYcxwN_T_MhN0JOH3SbGfKE4oqDaKUJaprotK869ogqAuHoAZg/exec", icon: "🍕" },
-            { title: "5xMan", url: "https://script.google.com/macros/s/AKfycbzPX_9WOPS6ffomQquz5p2hQ05xCWQS4wzJa1vw7ji-XX-W1zuiiifzzT5gcbOgeSRb/exec", icon: "🏃" },
-            { title: "7 Days Without Rain", url: "https://script.google.com/macros/s/AKfycbxgVuqt5WWMel9kMaeOqr1kCkcYmnzkummHCObLlR7DC4qPFkc5x9g6u_9lQhQ0LNfm/exec", icon: "🌧️" },
-            { title: "7th Inning Smash", url: "https://script.google.com/macros/s/AKfycbx5DoGRFsMer9UC9NfBvXUkmP_BnVVCgHnOUQGY2uOMWWJQ1gBzEVEqLOeIM5oPBje7Ng/exec", icon: "⚾" },
-            { title: "8 Ball Pool", url: "https://script.google.com/macros/s/AKfycbxaL_B8Zo2IVTPOvhbqkz8P-JmZsSqrtXgbAjlJ3_xsw-jmNvI9wpmZsYq99PDE4cOL/exec", icon: "🎱" },
-            { title: "10 Bullets", url: "https://script.google.com/macros/s/AKfycbwZwrDnGWCLYJs0TMPe-SI29MoJla6tHJ7uA8DaGSS9EXwJuVeeuQxoBNXRYUopo6STXg/exec", icon: "🔫" },
-            { title: "10 Minutes Till Dawn", url: "https://script.google.com/macros/s/AKfycbx2IFRHO-Q3RsgjhwW_bUmXSIRPff-nBBosAEZeXD8Y0e9EpfFFjCjJZzPWvO5147UY/exec", icon: "💀" },
-            { title: "10 More Bullets", url: "https://script.google.com/macros/s/AKfycbyoLIwbMnHRpl9QdLeitp4hZZ1UTa8lL0FUw0gZeHjLvZe1EMfpalcK_2awrtxlDAnA/exec", icon: "🔫" },
-            { title: "10 is Again", url: "https://script.google.com/macros/s/AKfycbxVIoku3O8oezuYWVeWbFXvxRk21uCWyJAEnG58Ay7TvykGXBIv4Rd7csvz22423OEh/exec", icon: "🔄" },
-            { title: "12 MiniBattles", url: "https://script.google.com/macros/s/AKfycbw73xjm9WWdI_rMibzPh2MImZBf6tsNOoUnhotODbh0qEG5jHf5UvD4K5uDVwtgEnQw8Q/exec", icon: "⚔️" },
-            { title: "13 Days in Hell", url: "https://script.google.com/macros/s/AKfycbz0DOQNEqAE9GB-45d5QfyQRB6zE3G67sER1QBW7m28ivuH_qItWk-ouEgoJKQymWedvA/exec", icon: "🔥" },
-            { title: "40x Escape", url: "https://script.google.com/macros/s/AKfycby4I_nNLhNlPxliiHr3R_qNVWB33hxXuqywwp7-TZsFPksPgQKxUmlPUNBxO_aPhYnV/exec", icon: "🗝️" },
-            { title: "60 Second Burger Run", url: "https://script.google.com/macros/s/AKfycbw4aO7Qz5XoO4KO5dmKQCy6DIUkbQ7c5tvXBIkv4mdjXFGJqrQ9YkqY4edXs7ScQ3zD/exec", icon: "🍔" },
-            { title: "60 Seconds Santa Run", url: "https://script.google.com/macros/s/AKfycbyf05_yYFZQyT9J94hH2rjd5soUEVJ1FcOCtt6AJ4Jv2PLONHF6unrsTeJhs0WxwQ3K9Q/exec", icon: "🎅" },
-            { title: "99 Balls", url: "https://script.google.com/macros/s/AKfycbxITALu9oE65UeWVJ59n1d8Z2f6Tda9ijHBb6tPhjz6YQz__GyDSKDl3t9rHxpZQ4_h/exec", icon: "🔴" },
-            { title: "99 Bricks", url: "https://script.google.com/macros/s/AKfycbxKdnBIlyJ5BKbI4cNEiOr2p-8nUDfZE53CgMh6xbqZWiprREQPal2rirfpX0YXKVAS/exec", icon: "🧱" },
-            { title: "99 Nights in Forest", url: "https://script.google.com/macros/s/AKfycbw4urIQgR3zAfmFsn3NWFC6kpsGYSWafyi6AWtyVNSyBkySH9O46LVnhej6fW7beFME/exec", icon: "🌳" },
-            { title: "100 Meter Dash", url: "https://script.google.com/macros/s/AKfycbzMCtRLcwMaa-U103yUE9s1ynhknEWyK2uRIGPPAXBeV18nbQ55N9UOYgRQ5cTU6vDK5A/exec", icon: "🏃" },
-            { title: "100 Meter Sprint", url: "https://script.google.com/macros/s/AKfycbwIsVIqmkMwH3Bwjy7EhCXJtSb4A7Fiit8pJJ-lfOEfUaCmBE0ko3aMWPRXN0LskZm6Og/exec", icon: "⚡" },
-            { title: "Abandoned", url: "https://script.google.com/macros/s/AKfycby6NyBKr5sGwJ5lGXSwGEq6DlpfC794H6eMj8ymQmt7T5l8_4Tk9yIXJhwNjzoifKIx/exec", icon: "🏚️" },
-            { title: "Abandoned: Cube Chambers", url: "https://script.google.com/macros/s/AKfycbwoBO363ht6VP6tcwCwCBI7B1WPveNYlyrvtRjjwAbT8TZNr7T4053p-xBD-5XfLSDJcQ/exec", icon: "📦" },
-            { title: "Abobo's Big Adventure", url: "https://script.google.com/macros/s/AKfycbxaJG8SPxL7EDTIJKVqtfsiGZn3YReGz1Y2Kw76c8r4SWuGhYy4Ynl8br_Yddymkj9GfQ/exec", icon: "💪" },
-            { title: "A Bonte Escape", url: "https://script.google.com/macros/s/AKfycbzVKq9ne5rcUubHPpE-HPImNY32NL2_yezOIZtxMXqYXpzK35nAzmZnJGWkJXmzsww/exec", icon: "🚪" },
-            { title: "Above Average Guy", url: "https://script.google.com/macros/s/AKfycbwHW2sQSPoAPmMFTKLjOJCN8yk-bOWq28ZSTm_I3C1pTMDydp9KHAXgTn_TTM_l3nzLAg/exec", icon: "🧍" },
-            { title: "Absorbed", url: "https://script.google.com/macros/s/AKfycby6l7gc5NeYP527oEuPWpsQlveByRmjcYwnrg4RxB5lImjVPMIyokKNWYrey83tRo_r/exec", icon: "🌀" },
-            { title: "Abuba the Alien", url: "https://script.google.com/macros/s/AKfycbwCGsJSC8Rl8gMVTMloH4E6tuqonrh-SYemixZslrOacv2GhQgU6_a0hnfeiS6IwhG60g/exec", icon: "👽" },
-            { title: "Ace Gangster", url: "https://script.google.com/macros/s/AKfycbyPJseC7UCOVNCBxq-QmhUn0pZzqAl7e4Ujkc9POkc9jCKtpXnOZYWP79H-EIGFHmk8/exec", icon: "🚬" },
-            { title: "Ace Gangster Taxi", url: "https://script.google.com/macros/s/AKfycbyf7qxduEyYXs5E7bJ7WzdN0nZsCVRxyZEiX1MOkyo7mbmvDUIrLaKuxVjse5CmtJVlNg/exec", icon: "🚕" },
-            { title: "Achievement Unlocked", url: "https://script.google.com/macros/s/AKfycbxEsaH5mWuWswPik3nCGEuPyk0b0tZ4hNsOoskqufxNRs-CIXGc5FFo5ORQAQu-ERgEJA/exec", icon: "🔓" },
-            { title: "Achievement Unlocked 2", url: "https://script.google.com/macros/s/AKfycbw0TbKNWfaP_jmOuUwViTG4wWK3zSVkmiIv9OqSiAIc9NZTZYW1xMS8YcGYBSXWPDabCw/exec", icon: "🔓" },
-            { title: "Achievement Unlocked 3", url: "https://script.google.com/macros/s/AKfycbzGgF42MoiILQLTVDjfJ7XPFqKSVu9mFIkfdt9EOQwnVP_UdFRJHrue6kjwtZGJKkvC/exec", icon: "🔓" },
-            { title: "Achilles", url: "https://script.google.com/macros/s/AKfycbyhEZPvEN2n6KlWOzOua2UjeLIxHR9AV14Il8ufTYNgvdvxpkTZxZPVSWlgwOIeba670Q/exec", icon: "🗡️" },
-            { title: "Acid Bunny", url: "https://script.google.com/macros/s/AKfycbzQinbUFpM6_ZM3lSnGIvfg3iRSHGUFPWlOpWyYKQUBnyZG5CNiqOKTQk2KT7FlUcVQ/exec", icon: "🐰" },
-            { title: "Acid Bunny 2", url: "https://script.google.com/macros/s/AKfycbwboektrWd8rlGoyqQylkwAPbrx0gGg3QvJ-bYg3Kc9IiQK-_H89RN-L6OTZK_qL2_Vrg/exec", icon: "🐰" },
-            { title: "Acid Rain", url: "https://script.google.com/macros/s/AKfycbwaVYAatmuoFi6_bwXdFxMg5a_XCAkmSJUXIlttbMEkt2M0_FuFn2s_AuEB4N4G4bTZ/exec", icon: "🧪" },
-            { title: "Action Turnip", url: "https://script.google.com/macros/s/AKfycbz2GrrcDq7T6-ypg7ObskaWqHsNbeXLhF9fj3r5RLxYYZiB0AVVPgc4Z0AakD_kSzMK/exec", icon: "🧅" },
-            { title: "Retro Bowl", url: "https://g.w3technic.com/games/retro-bowl/", icon: "🏈" },
-            { title: "Stickman Hook", url: "https://monkeymart6x.io/stickman-hook.embed", icon: "🪝" },
-            { title: "Slope", url: "https://slope-unblocked-10x.github.io/action-games/slope/", icon: "⛷️" }
-        ];
+  </div>
+</div>
 
-        // --- WINDOW MANAGER ---
-        const WindowManager = {
-            zCount: 100,
-            instances: new Set(),
+<!-- Game Viewer -->
+<div id="game-viewer">
+  <div id="game-topbar">
+    <span>⬛ MonoOS</span>
+    <span style="color:var(--border2)">›</span>
+    <span id="game-title">Game</span>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="gv-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+      <button class="gv-btn" onclick="closeGame()">✕ Close</button>
+    </div>
+  </div>
+  <div id="loading-frame" class="loading-frame">
+    <div class="spin-ring"></div>
+    <p>Loading game...</p>
+  </div>
+  <iframe id="game-frame" src="" allowfullscreen allow="gamepad; fullscreen"></iframe>
+</div>
 
-            openLibrary() {
-                if(this.instances.has('library')) {
-                    this.focus('win-library');
-                    return;
-                }
+<!-- Context Menu -->
+<div id="ctx-menu">
+  <div class="ctx-item" onclick="showSection('games');hideCtx()">Open Games</div>
+  <div class="ctx-item" onclick="showSection('terminal');hideCtx()">Open Terminal</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="location.reload();hideCtx()">Restart MonoOS</div>
+  <div class="ctx-item" onclick="activateEasterEgg();hideCtx()">About MonoOS</div>
+</div>
 
-                let html = `<div class="library-grid">`;
-                GAME_DATA.forEach(g => {
-                    html += `
-                        <div class="game-card" onclick="GamePlayer.launch('${g.title}', '${g.url}')">
-                            <div class="icon">${g.icon}</div>
-                            <div class="name">${g.title}</div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
+<!-- Notification -->
+<div id="notif"><div class="n-title" id="notif-title">System</div><div id="notif-msg">Welcome to MonoOS</div></div>
 
-                this.create('library', 'Game Library', html, { width: '800px', height: '600px' });
-            },
+<script>
+// ═══════════════════════════════════════════════════════
+//  GAME LIBRARY — deduplicated by name AND url
+// ═══════════════════════════════════════════════════════
+const RAW_GAMES = [
+  // Action
+  {name:"Slope",url:"https://slope-game.github.io/",cat:"action",icon:"🏔️"},
+  {name:"Run 3",url:"https://www.coolmathgames.com/0-run-3",cat:"action",icon:"🏃"},
+  {name:"Vex 3",url:"https://www.coolmathgames.com/0-vex-3",cat:"action",icon:"⚡"},
+  {name:"Vex 4",url:"https://www.coolmathgames.com/0-vex-4",cat:"action",icon:"⚡"},
+  {name:"Vex 5",url:"https://www.coolmathgames.com/0-vex-5",cat:"action",icon:"⚡"},
+  {name:"Vex 6",url:"https://www.coolmathgames.com/0-vex-6",cat:"action",icon:"⚡"},
+  {name:"Moto X3M",url:"https://www.coolmathgames.com/0-moto-x3m",cat:"action",icon:"🏍️"},
+  {name:"Moto X3M 2",url:"https://www.coolmathgames.com/0-moto-x3m-2",cat:"action",icon:"🏍️"},
+  {name:"Moto X3M Pool Party",url:"https://www.coolmathgames.com/0-moto-x3m-pool-party",cat:"action",icon:"🏍️"},
+  {name:"Moto X3M Winter",url:"https://www.coolmathgames.com/0-moto-x3m-winter",cat:"action",icon:"🏍️"},
+  {name:"Moto X3M Spooky Land",url:"https://www.coolmathgames.com/0-moto-x3m-spooky-land",cat:"action",icon:"🏍️"},
+  {name:"Fireboy and Watergirl 1",url:"https://www.coolmathgames.com/0-fireboy-and-watergirl-1-forest-temple",cat:"action",icon:"🔥"},
+  {name:"Fireboy and Watergirl 2",url:"https://www.coolmathgames.com/0-fireboy-and-watergirl-2-light-temple",cat:"action",icon:"🔥"},
+  {name:"Fireboy and Watergirl 3",url:"https://www.coolmathgames.com/0-fireboy-and-watergirl-3-ice-temple",cat:"action",icon:"🔥"},
+  {name:"Fireboy and Watergirl 4",url:"https://www.coolmathgames.com/0-fireboy-and-watergirl-4-crystal-temple",cat:"action",icon:"🔥"},
+  {name:"Fireboy and Watergirl 5",url:"https://www.coolmathgames.com/0-fireboy-and-watergirl-5-elements",cat:"action",icon:"🔥"},
+  {name:"Fireboy and Watergirl 6",url:"https://www.coolmathgames.com/0-fireboy-watergirl-6",cat:"action",icon:"🔥"},
+  {name:"OvO",url:"https://www.coolmathgames.com/0-ovo",cat:"action",icon:"🥚"},
+  {name:"Parkour Block 3D",url:"https://www.coolmathgames.com/0-parkour-block-3d",cat:"action",icon:"🧱"},
+  // Puzzle
+  {name:"2048",url:"https://play2048.co/",cat:"puzzle",icon:"🔢"},
+  {name:"Bloxorz",url:"https://www.coolmathgames.com/0-bloxorz",cat:"puzzle",icon:"📦"},
+  {name:"Red Ball 4",url:"https://www.coolmathgames.com/0-red-ball-4",cat:"puzzle",icon:"🔴"},
+  {name:"Sugar Sugar",url:"https://www.coolmathgames.com/0-sugar-sugar",cat:"puzzle",icon:"🍬"},
+  {name:"Jelly Truck",url:"https://www.coolmathgames.com/0-jelly-truck",cat:"puzzle",icon:"🟩"},
+  {name:"IQ Ball",url:"https://www.coolmathgames.com/0-iq-ball",cat:"puzzle",icon:"🎱"},
+  {name:"Cut the Rope",url:"https://www.crazygames.com/game/cut-the-rope",cat:"puzzle",icon:"🪢"},
+  {name:"Snail Bob",url:"https://www.coolmathgames.com/0-snail-bob",cat:"puzzle",icon:"🐌"},
+  {name:"Snail Bob 2",url:"https://www.coolmathgames.com/0-snail-bob-2",cat:"puzzle",icon:"🐌"},
+  {name:"Wheely",url:"https://www.coolmathgames.com/0-wheely",cat:"puzzle",icon:"🔵"},
+  {name:"Wheely 2",url:"https://www.coolmathgames.com/0-wheely-2",cat:"puzzle",icon:"🔵"},
+  {name:"Wheely 3",url:"https://www.coolmathgames.com/0-wheely-3",cat:"puzzle",icon:"🔵"},
+  // Arcade
+  {name:"Snake",url:"https://www.google.com/search?q=play+snake&num=1",cat:"arcade",icon:"🐍"},
+  {name:"Pacman",url:"https://freepacman.org/",cat:"arcade",icon:"👻"},
+  {name:"Geometry Dash",url:"https://geometry-dash-online.com/",cat:"arcade",icon:"🔷"},
+  {name:"Flappy Bird",url:"https://flappybird.io/",cat:"arcade",icon:"🐦"},
+  {name:"Drift Boss",url:"https://www.coolmathgames.com/0-drift-boss",cat:"arcade",icon:"🚗"},
+  {name:"Retro Bowl",url:"https://retrobowl.me/",cat:"arcade",icon:"🏈"},
+  {name:"Basket Random",url:"https://www.crazygames.com/game/basket-random",cat:"arcade",icon:"🏀"},
+  {name:"Penalty Kick Online",url:"https://www.crazygames.com/game/penalty-kick-online",cat:"arcade",icon:"⚽"},
+  {name:"Friday Night Funkin",url:"https://fridaynightfunking.github.io/",cat:"arcade",icon:"🎵"},
+  {name:"Soccer Random",url:"https://www.crazygames.com/game/soccer-random",cat:"arcade",icon:"⚽"},
+  {name:"Basketball Stars",url:"https://www.crazygames.com/game/basketball-stars",cat:"arcade",icon:"🏀"},
+  {name:"Rooftop Snipers",url:"https://www.crazygames.com/game/rooftop-snipers",cat:"arcade",icon:"🎯"},
+  {name:"Boxing Random",url:"https://www.crazygames.com/game/boxing-random",cat:"arcade",icon:"🥊"},
+  // Shooter
+  {name:"Krunker.io",url:"https://krunker.io/",cat:"shooter",icon:"🎯"},
+  {name:"Shell Shockers",url:"https://shellshock.io/",cat:"shooter",icon:"🥚"},
+  {name:"1v1.lol",url:"https://1v1.lol/",cat:"shooter",icon:"🏗️"},
+  {name:"Surviv.io",url:"https://surviv.io/",cat:"shooter",icon:"💥"},
+  {name:"Warbrokers",url:"https://warbrokers.io/",cat:"shooter",icon:"🪖"},
+  {name:"Zombs.io",url:"https://zombs.io/",cat:"shooter",icon:"🧟"},
+  {name:"Paper.io 2",url:"https://paper-io.com/",cat:"shooter",icon:"📄"},
+  {name:"Slither.io",url:"https://slither.io/",cat:"shooter",icon:"🐍"},
+  {name:"Agar.io",url:"https://agar.io/",cat:"shooter",icon:"🟢"},
+  {name:"Diep.io",url:"https://diep.io/",cat:"shooter",icon:"🔫"},
+  {name:"Moomoo.io",url:"https://moomoo.io/",cat:"shooter",icon:"🌾"},
+  {name:"Superhot",url:"https://www.crazygames.com/game/superhot",cat:"shooter",icon:"🔴"},
+  // Strategy
+  {name:"Bloons Tower Defense 5",url:"https://www.coolmathgames.com/0-bloons-tower-defense-5",cat:"strategy",icon:"🎈"},
+  {name:"Kingdom Rush",url:"https://www.crazygames.com/game/kingdom-rush",cat:"strategy",icon:"🏰"},
+  {name:"Stick War Legacy",url:"https://www.crazygames.com/game/stick-war-legacy",cat:"strategy",icon:"⚔️"},
+  {name:"Stick Empires",url:"https://www.crazygames.com/game/stick-empires",cat:"strategy",icon:"⚔️"},
+  {name:"Clash of Tanks",url:"https://www.crazygames.com/game/clash-of-tanks",cat:"strategy",icon:"🪖"},
+  {name:"Mine Clone 4",url:"https://www.crazygames.com/game/mine-clone-4",cat:"strategy",icon:"⛏️"},
+  {name:"Territorial.io",url:"https://territorial.io/",cat:"strategy",icon:"🗺️"},
+  {name:"Lordz.io",url:"https://lordz.io/",cat:"strategy",icon:"👑"},
+  // Sports
+  {name:"Getaway Shootout",url:"https://www.coolmathgames.com/0-getaway-shootout",cat:"sports",icon:"🏃"},
+  {name:"Football Legends",url:"https://www.crazygames.com/game/football-legends",cat:"sports",icon:"🏈"},
+  {name:"Snow Rider 3D",url:"https://www.crazygames.com/game/snow-rider-3d",cat:"sports",icon:"🎿"},
+  {name:"Tap-Tap Shots",url:"https://www.coolmathgames.com/0-tap-tap-shots",cat:"sports",icon:"🏀"},
+  {name:"Big Shot Boxing",url:"https://www.coolmathgames.com/0-big-shot-boxing",cat:"sports",icon:"🥊"},
+  // Racing
+  {name:"Road Fury",url:"https://www.coolmathgames.com/0-road-fury",cat:"racing",icon:"🚗"},
+  {name:"Madalin Stunt Cars 2",url:"https://www.crazygames.com/game/madalin-stunt-cars-2",cat:"racing",icon:"🏎️"},
+  {name:"Madalin Stunt Cars 3",url:"https://www.crazygames.com/game/madalin-stunt-cars-3",cat:"racing",icon:"🏎️"},
+  {name:"Highway Racer 3D",url:"https://www.crazygames.com/game/highway-racer-3d",cat:"racing",icon:"🛣️"},
+  {name:"Short Life",url:"https://www.coolmathgames.com/0-short-life",cat:"racing",icon:"🎭"},
+  {name:"Death Run 3D",url:"https://www.crazygames.com/game/death-run-3d",cat:"racing",icon:"💀"},
+  // Idle
+  {name:"Cookie Clicker",url:"https://orteil.dashnet.org/cookieclicker/",cat:"idle",icon:"🍪"},
+  {name:"Adventure Capitalist",url:"https://www.crazygames.com/game/adventure-capitalist",cat:"idle",icon:"💰"},
+  {name:"Idle Breakout",url:"https://idle-breakout.com/",cat:"idle",icon:"🧱"},
+  {name:"Learn to Fly 3",url:"https://www.coolmathgames.com/0-learn-to-fly-3",cat:"idle",icon:"🐧"},
+  {name:"Earn to Die 2",url:"https://www.crazygames.com/game/earn-to-die-2",cat:"idle",icon:"🚗"},
+  {name:"Dino Game",url:"https://chromedino.com/",cat:"arcade",icon:"🦕"},
+  {name:"Minecraft Classic",url:"https://classic.minecraft.net/",cat:"strategy",icon:"⛏️"},
+  {name:"Among Us",url:"https://www.crazygames.com/game/among-us",cat:"action",icon:"🚀"},
+  {name:"Subway Surfers",url:"https://subway-surfers.com/",cat:"action",icon:"🛹"},
+  {name:"Temple Run",url:"https://www.crazygames.com/game/temple-run",cat:"action",icon:"🏛️"},
+  {name:"Angry Birds",url:"https://www.crazygames.com/game/angry-birds-reloaded",cat:"puzzle",icon:"🐦"},
+  {name:"Plants vs Zombies",url:"https://www.crazygames.com/game/plants-vs-zombies",cat:"strategy",icon:"🌻"},
+  {name:"Tetris",url:"https://tetris.com/play-tetris",cat:"puzzle",icon:"🟦"},
+  {name:"Sudoku",url:"https://www.coolmathgames.com/0-sudoku",cat:"puzzle",icon:"🔢"},
+  {name:"Chess",url:"https://www.chess.com/play/computer",cat:"strategy",icon:"♟️"},
+  {name:"Wordle",url:"https://www.nytimes.com/games/wordle/index.html",cat:"puzzle",icon:"📝"},
+  {name:"Crossword",url:"https://www.nytimes.com/crosswords",cat:"puzzle",icon:"📰"},
+  {name:"Minecraft Building",url:"https://classic.minecraft.net/",cat:"strategy",icon:"🧱"},
+];
 
-            openAbout() {
-                if(this.instances.has('about')) return;
-                const html = `
-                    <div style="text-align:center; padding: 20px;">
-                        <h2 style="margin-bottom:10px;">Stars OS</h2>
-                        <p style="color:var(--text-dim); font-size:0.9rem;">Version 2.0.4 Premium</p>
-                        <div style="margin:20px 0; font-size:3rem;">🌟</div>
-                        <p style="font-size:0.85rem; line-height:1.6;">A high-performance gaming environment built for speed and privacy.</p>
-                    </div>
-                `;
-                this.create('about', 'System Information', html, { width: '400px', height: '300px' });
-            },
+// Deduplicate by name AND url
+function dedupeGames(arr){
+  const seenNames=new Set(), seenUrls=new Set(), out=[];
+  for(const g of arr){
+    const nk=g.name.toLowerCase().replace(/\s+/g,''), uk=g.url.toLowerCase();
+    if(!seenNames.has(nk)&&!seenUrls.has(uk)){
+      seenNames.add(nk); seenUrls.add(uk); out.push(g);
+    }
+  }
+  return out;
+}
+const GAMES = dedupeGames(RAW_GAMES);
+let currentFilter='all', currentSearch='';
 
-            create(id, title, content, style) {
-                this.instances.add(id);
-                const winId = `win-${id}`;
-                const win = document.createElement('div');
-                win.className = 'window';
-                win.id = winId;
-                win.style.width = style.width;
-                win.style.height = style.height;
-                win.style.left = '15%';
-                win.style.top = '10%';
-                win.style.zIndex = ++this.zCount;
+// ═══════════════════════════════════════════════════════
+//  STARFIELD
+// ═══════════════════════════════════════════════════════
+const canvas=document.getElementById('stars-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,stars=[],shooters=[],starsEnabled=true;
+function resizeCanvas(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+function mkStar(){
+  return{
+    x:Math.random()*W, y:Math.random()*H,
+    r:Math.random()*1.5+0.3,
+    speed:Math.random()*0.08+0.02,
+    opacity:Math.random(),
+    opDir:Math.random()>0.5?1:-1,
+    opSpeed:Math.random()*0.005+0.001,
+    parallax:Math.random()*0.5+0.5
+  }
+}
+function mkShooter(){
+  const angle=Math.PI/6+Math.random()*Math.PI/6;
+  return{
+    x:Math.random()*W*0.5, y:Math.random()*H*0.3,
+    vx:Math.cos(angle)*8, vy:Math.sin(angle)*8,
+    length:Math.random()*80+60, life:1, decay:0.012
+  }
+}
+function initStars(){
+  stars=[];
+  const n=Math.min(180, Math.floor(W*H/8000));
+  for(let i=0;i<n;i++) stars.push(mkStar());
+}
+function drawStars(ts){
+  ctx.clearRect(0,0,W,H);
+  if(!starsEnabled) return;
+  // Stars
+  for(const s of stars){
+    s.y+=s.speed*s.parallax;
+    s.opacity+=s.opDir*s.opSpeed;
+    if(s.opacity>1){s.opacity=1;s.opDir=-1}
+    if(s.opacity<0.1){s.opacity=0.1;s.opDir=1}
+    if(s.y>H) s.y=0;
+    const g=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*2);
+    g.addColorStop(0,`rgba(255,255,255,${s.opacity})`);
+    g.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r*2,0,Math.PI*2);
+    ctx.fillStyle=g; ctx.fill();
+  }
+  // Shooting stars
+  for(let i=shooters.length-1;i>=0;i--){
+    const s=shooters[i];
+    ctx.beginPath();
+    ctx.moveTo(s.x,s.y);
+    ctx.lineTo(s.x-s.vx*(s.length/s.speed||10),s.y-s.vy*(s.length/s.speed||10));
+    const sg=ctx.createLinearGradient(s.x,s.y,s.x-s.vx*10,s.y-s.vy*10);
+    sg.addColorStop(0,`rgba(255,255,255,${s.life})`);
+    sg.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.strokeStyle=sg; ctx.lineWidth=1.5; ctx.stroke();
+    s.x+=s.vx; s.y+=s.vy; s.life-=s.decay;
+    if(s.life<=0||s.x>W||s.y>H) shooters.splice(i,1);
+  }
+  // Spawn shooting star occasionally
+  if(Math.random()<0.002) shooters.push(mkShooter());
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize',()=>{resizeCanvas();initStars()});
+resizeCanvas(); initStars(); requestAnimationFrame(drawStars);
 
-                win.innerHTML = `
-                    <div class="window-header" onmousedown="WindowManager.focus('${winId}')">
-                        <div class="window-title">${title.toUpperCase()}</div>
-                        <div class="window-controls">
-                            <div class="win-btn win-min" onclick="WindowManager.close('${id}')"></div>
-                            <div class="win-btn win-close" onclick="WindowManager.close('${id}')"></div>
-                        </div>
-                    </div>
-                    <div class="window-content">${content}</div>
-                `;
+// ═══════════════════════════════════════════════════════
+//  BOOT SEQUENCE
+// ═══════════════════════════════════════════════════════
+const dosLines=[
+  'MS-DOS Version 6.22','Copyright (C) Microsoft Corp 1981-2001','',
+  'C:\\>_', 'C:\\>MONOOS /INIT',
+  'Loading MonoOS kernel... OK',
+  'Initializing memory... 640K OK',
+  'Loading device drivers... OK',
+  'HIMEM.SYS is loaded.','EMM386.EXE not loaded.','',
+  'Starting MonoOS...','Please wait▌'
+];
+let dosIdx=0;
+function typeDos(){
+  if(dosIdx>=dosLines.length) return;
+  const el=document.getElementById('dos-output');
+  const line=document.createElement('div');
+  line.textContent=dosLines[dosIdx++];
+  el.appendChild(line);
+  if(dosIdx<dosLines.length) setTimeout(typeDos, dosIdx===3?600:dosIdx===4?800:180);
+}
 
-                document.getElementById('window-layer').appendChild(win);
-                this.makeDraggable(win);
-            },
+function showBoot(id){
+  document.querySelectorAll('.boot-screen').forEach(s=>{s.classList.remove('active','visible')});
+  const el=document.getElementById(id);
+  el.classList.add('active');
+  setTimeout(()=>el.classList.add('visible'),50);
+}
 
-            focus(winId) {
-                const el = document.getElementById(winId);
-                if(el) el.style.zIndex = ++this.zCount;
-            },
+async function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
-            close(id) {
-                const el = document.getElementById(`win-${id}`);
-                if(el) {
-                    el.style.opacity = '0';
-                    el.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        el.remove();
-                        this.instances.delete(id);
-                    }, 200);
-                }
-            },
+async function runBoot(){
+  // Screen 1: DOS
+  showBoot('boot1'); typeDos();
+  await sleep(3200);
 
-            makeDraggable(el) {
-                let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-                const header = el.querySelector('.window-header');
-                header.onmousedown = (e) => {
-                    pos3 = e.clientX;
-                    pos4 = e.clientY;
-                    document.onmouseup = () => {
-                        document.onmouseup = null;
-                        document.onmousemove = null;
-                    };
-                    document.onmousemove = (e) => {
-                        pos1 = pos3 - e.clientX;
-                        pos2 = pos4 - e.clientY;
-                        pos3 = e.clientX;
-                        pos4 = e.clientY;
-                        el.style.top = (el.offsetTop - pos2) + "px";
-                        el.style.left = (el.offsetLeft - pos1) + "px";
-                    };
-                };
-            }
-        };
+  // Screen 2: Win9x
+  showBoot('boot2');
+  const bar=document.getElementById('win9x-bar');
+  const status=document.getElementById('win9x-status');
+  setTimeout(()=>{bar.style.width='30%';status.textContent='Loading system files...'},200);
+  setTimeout(()=>{bar.style.width='65%';status.textContent='Starting MonoOS components...'},1000);
+  setTimeout(()=>{bar.style.width='100%';status.textContent='Almost ready...'},2000);
+  await sleep(3000);
 
-        // --- GAME PLAYER ---
-        const GamePlayer = {
-            launch(title, url) {
-                const modal = document.getElementById('modal-player');
-                const frame = document.getElementById('game-frame');
-                document.getElementById('modal-title').innerText = title.toUpperCase();
-                frame.src = url;
-                modal.style.display = 'flex';
-            },
-            close() {
-                const modal = document.getElementById('modal-player');
-                const frame = document.getElementById('game-frame');
-                frame.src = '';
-                modal.style.display = 'none';
-            }
-        };
+  // Screen 3: XP style
+  showBoot('boot3');
+  await sleep(3500);
 
-        // --- SYSTEM INITIALIZATION ---
-        window.addEventListener('load', () => {
-            // Clock
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('clock-display').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            }, 1000);
+  // Screen 4: Modern
+  showBoot('boot4');
+  await sleep(2500);
 
-            // Boot Sequence
-            setTimeout(() => {
-                document.getElementById('boot-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('boot-screen').style.display = 'none';
-                    document.getElementById('desktop').style.display = 'block';
-                    initStarfield();
-                    WindowManager.openLibrary();
-                }, 800);
-            }, 2600);
-        });
+  // Screen 5: MonoOS splash
+  showBoot('boot5');
+  await sleep(2500);
 
-        // ESC Key handling
-        window.addEventListener('keydown', e => {
-            if(e.key === 'Escape') GamePlayer.close();
-        });
+  // Fade to desktop
+  const boot5=document.getElementById('boot5');
+  boot5.classList.add('fade-to-desktop');
+  await sleep(1400);
+  document.getElementById('boot').style.opacity='0';
+  document.getElementById('boot').style.transition='opacity 0.8s';
+  const desktop=document.getElementById('desktop');
+  desktop.style.display='flex';
+  await sleep(100);
+  desktop.classList.add('visible');
+  await sleep(800);
+  document.getElementById('boot').style.display='none';
+  initDesktop();
+}
 
-        // Minimal Starfield (Subtle)
-        function initStarfield() {
-            const canvas = document.getElementById('starfield');
-            const ctx = canvas.getContext('2d');
-            let stars = [];
-            
-            const resize = () => {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            };
-            window.onresize = resize;
-            resize();
+// ═══════════════════════════════════════════════════════
+//  DESKTOP INIT
+// ═══════════════════════════════════════════════════════
+function initDesktop(){
+  updateClock();
+  setInterval(updateClock,1000);
+  renderGames();
+  renderFeatured();
+  updateStats();
+  startTermWidget();
+  showNotif('System','Welcome to MonoOS. Click any game to play!',3000);
+}
 
-            for(let i=0; i<120; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    s: Math.random() * 1.5,
-                    v: Math.random() * 0.2
-                });
-            }
+function updateClock(){
+  const n=new Date();
+  const h=n.getHours(),m=n.getMinutes().toString().padStart(2,'0');
+  const ampm=h>=12?'PM':'AM', h12=h%12||12;
+  document.getElementById('clock').textContent=`${h12}:${m} ${ampm} — ${n.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;
+}
 
-            const anim = () => {
-                ctx.clearRect(0,0, canvas.width, canvas.height);
-                ctx.fillStyle = "rgba(255,255,255,0.3)";
-                stars.forEach(st => {
-                    ctx.beginPath();
-                    ctx.arc(st.x, st.y, st.s, 0, 7);
-                    ctx.fill();
-                    st.y += st.v;
-                    if(st.y > canvas.height) st.y = 0;
-                });
-                requestAnimationFrame(anim);
-            };
-            anim();
-        }
+function updateStats(){
+  document.getElementById('stat-total').textContent=GAMES.length;
+  const cats=new Set(GAMES.map(g=>g.cat));
+  document.getElementById('stat-cats').textContent=cats.size;
+  document.getElementById('about-games').textContent=`${GAMES.length} unique games available`;
+}
 
-    </script>
+function renderFeatured(){
+  const featured=GAMES.slice(0,4);
+  const el=document.getElementById('featured-list');
+  el.innerHTML='';
+  featured.forEach(g=>{
+    const d=document.createElement('div');
+    d.className='featured-game';
+    d.innerHTML=`<div class="game-icon-lg">${g.icon}</div><div class="featured-info"><h3>${g.name}</h3><p>${g.cat.charAt(0).toUpperCase()+g.cat.slice(1)}</p></div><div style="margin-left:auto;font-size:11px;color:var(--text3)">▶ Play</div>`;
+    d.onclick=()=>openGame(g);
+    el.appendChild(d);
+  });
+}
+
+function getFilteredGames(){
+  return GAMES.filter(g=>{
+    const catMatch=currentFilter==='all'||g.cat===currentFilter;
+    const searchMatch=!currentSearch||g.name.toLowerCase().includes(currentSearch.toLowerCase());
+    return catMatch&&searchMatch;
+  });
+}
+
+function renderGames(){
+  const grid=document.getElementById('games-grid');
+  const list=getFilteredGames();
+  grid.innerHTML='';
+  list.forEach(g=>{
+    const card=document.createElement('div');
+    card.className='game-card';
+    card.innerHTML=`<div class="game-thumb">${g.icon}</div><div class="game-overlay"><button class="play-btn">▶ Play</button></div><div class="game-info"><div class="game-name">${g.name}</div><div class="game-cat">${g.cat}</div></div>`;
+    card.onclick=()=>openGame(g);
+    grid.appendChild(card);
+  });
+  if(list.length===0){
+    grid.innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px;grid-column:1/-1">No games found matching your search.</div>';
+  }
+}
+
+function setFilter(cat,btn){
+  currentFilter=cat;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGames();
+}
+
+function filterGames(q){
+  currentSearch=q;
+  if(q.length>0) showSection('games');
+  renderGames();
+}
+
+// ═══════════════════════════════════════════════════════
+//  GAME VIEWER
+// ═══════════════════════════════════════════════════════
+function openGame(g){
+  addRecent(g);
+  const viewer=document.getElementById('game-viewer');
+  const frame=document.getElementById('game-frame');
+  const loading=document.getElementById('loading-frame');
+  document.getElementById('game-title').textContent=g.name;
+  viewer.classList.add('open');
+  frame.style.opacity='0';
+  loading.style.display='flex';
+  frame.src='';
+  setTimeout(()=>{
+    frame.src=g.url;
+    frame.onload=()=>{
+      loading.style.display='none';
+      frame.style.opacity='1';
+      frame.style.transition='opacity 0.3s';
+    };
+  },300);
+}
+
+function closeGame(){
+  const viewer=document.getElementById('game-viewer');
+  viewer.classList.remove('open');
+  document.getElementById('game-frame').src='';
+}
+
+function toggleFullscreen(){
+  const frame=document.getElementById('game-frame');
+  if(frame.requestFullscreen) frame.requestFullscreen();
+}
+
+let recentGames=[];
+function addRecent(g){
+  recentGames=recentGames.filter(r=>r.name!==g.name);
+  recentGames.unshift(g);
+  if(recentGames.length>4) recentGames.pop();
+  renderRecent();
+}
+function renderRecent(){
+  const el=document.getElementById('recent-list');
+  if(!recentGames.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0">No games played yet.</div>';return}
+  el.innerHTML='';
+  recentGames.forEach(g=>{
+    const d=document.createElement('div');
+    d.className='recent-item';
+    d.innerHTML=`<div class="recent-icon">${g.icon}</div><div class="recent-info"><div class="recent-name">${g.name}</div><div class="recent-cat">${g.cat}</div></div>`;
+    d.onclick=()=>openGame(g);
+    el.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  TERMINAL
+// ═══════════════════════════════════════════════════════
+const termHistory=[];
+let termIdx=0;
+const TERM_CMDS={
+  help:{run:()=>`Available commands:\n  help        — show this help\n  games       — list all games\n  search [q]  — search games\n  play [name] — play a game\n  clear       — clear terminal\n  theme       — list themes\n  date        — show date/time\n  stats       — library stats\n  ls          — list sections\n  whoami      — identify user\n  matrix      — activate matrix theme\n  easter      — ??? secret ???\n  credits     — about MonoOS`},
+  games:{run:()=>GAMES.map((g,i)=>`${String(i+1).padStart(3,' ')}  ${g.icon} ${g.name} [${g.cat}]`).join('\n')},
+  ls:{run:()=>'Sections: home  games  terminal  settings'},
+  date:{run:()=>new Date().toLocaleString()},
+  whoami:{run:()=>'guest@monoos — unauthorized access logged 😉'},
+  clear:{run:()=>{ document.getElementById('terminal-body').innerHTML=''; return null;}},
+  stats:{run:()=>`Total games:    ${GAMES.length}\nCategories:     ${new Set(GAMES.map(g=>g.cat)).size}\nDuplicates rm:  ${RAW_GAMES.length-GAMES.length}\nSystem uptime:  ${Math.floor(performance.now()/1000)}s`},
+  credits:{run:()=>`MonoOS v2.0.1\nBuilt with ❤ and JavaScript\nMonolithics Corp. © 2025\nAll games belong to their respective owners.`},
+  matrix:{run:()=>{setTheme('green');return'Matrix theme activated. Welcome to the real world, Neo.'}},
+  amber:{run:()=>{setTheme('amber');return'Amber terminal mode activated. Classic.'}},
+  mono:{run:()=>{setTheme('default');return'Monochrome mode restored.'}},
+  theme:{run:()=>'Themes: mono | matrix | amber\nUsage: just type the theme name'},
+  easter:{run:()=>{activateEasterEgg();return'🎉 You found the easter egg! Enjoy the show...'}},
+  reboot:{run:()=>{setTimeout(()=>location.reload(),1000);return'Rebooting MonoOS...'}}
+};
+function termPrint(text,cls='t-out'){
+  const body=document.getElementById('terminal-body');
+  if(text===null) return;
+  text.split('\n').forEach(line=>{
+    const d=document.createElement('div');
+    d.className=cls; d.textContent=line;
+    body.appendChild(d);
+  });
+  body.scrollTop=body.scrollHeight;
+}
+function termExec(raw){
+  const body=document.getElementById('terminal-body');
+  const pLine=document.createElement('div');
+  pLine.innerHTML=`<span class="t-prompt">guest@monoos:~$ </span>${escHtml(raw)}`;
+  body.appendChild(pLine);
+  const parts=raw.trim().split(' ');
+  const cmd=parts[0].toLowerCase(), args=parts.slice(1).join(' ');
+  if(!cmd){body.scrollTop=body.scrollHeight;return}
+  if(cmd==='play'){
+    const q=args.toLowerCase();
+    const g=GAMES.find(g=>g.name.toLowerCase().includes(q));
+    if(g){openGame(g);termPrint(`Launching ${g.name}...`)}
+    else termPrint(`Game not found: "${args}"`, 't-err');
+  } else if(cmd==='search'){
+    const q=args.toLowerCase();
+    const res=GAMES.filter(g=>g.name.toLowerCase().includes(q)||g.cat.includes(q));
+    termPrint(res.length?res.map(g=>`  ${g.icon} ${g.name} [${g.cat}]`).join('\n'):`No results for "${args}"`,res.length?'t-out':'t-err');
+  } else if(TERM_CMDS[cmd]){
+    const r=TERM_CMDS[cmd].run();
+    if(r!==null) termPrint(r);
+  } else {
+    termPrint(`Command not found: ${cmd}. Type 'help' for commands.`,'t-err');
+  }
+  body.scrollTop=body.scrollHeight;
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+document.getElementById('t-input').addEventListener('keydown',e=>{
+  const inp=e.target;
+  if(e.key==='Enter'){
+    const val=inp.value.trim();
+    if(val){termHistory.unshift(val);termIdx=0}
+    termExec(inp.value);
+    inp.value='';
+  } else if(e.key==='ArrowUp'){
+    if(termIdx<termHistory.length){inp.value=termHistory[termIdx++]}
+    e.preventDefault();
+  } else if(e.key==='ArrowDown'){
+    termIdx=Math.max(0,termIdx-1);
+    inp.value=termIdx>0?termHistory[termIdx-1]:'';
+    e.preventDefault();
+  }
+});
+document.getElementById('sec-terminal').addEventListener('click',()=>{
+  document.getElementById('t-input').focus();
+});
+
+// Terminal widget on home
+const twLines=[
+  ['prompt','guest@monoos:~$ whoami'],
+  ['out','guest — authorized user'],
+  ['prompt','guest@monoos:~$ stats'],
+  ['out',`${GAMES.length} games loaded // 0 duplicates // uptime 0s`],
+  ['prompt','guest@monoos:~$ ls games/'],
+  ['out','action/  arcade/  puzzle/  shooter/  strategy/  racing/  idle/'],
+  ['prompt','guest@monoos:~$ echo "Ready to play"'],
+  ['out','"Ready to play"'],
+  ['prompt','guest@monoos:~$ _'],
+];
+function startTermWidget(){
+  const w=document.getElementById('term-widget');
+  w.innerHTML='';
+  let i=0;
+  function nextLine(){
+    if(i>=twLines.length) return;
+    const [type,text]=twLines[i++];
+    const d=document.createElement('div');
+    d.className='term-line';
+    d.style.animationDelay=`${i*0.15}s`;
+    d.style.color=type==='prompt'?'#0f0':'#666';
+    d.textContent=text;
+    w.appendChild(d);
+    setTimeout(nextLine, 160);
+  }
+  nextLine();
+}
+
+// ═══════════════════════════════════════════════════════
+//  SECTION NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  const btns=document.querySelectorAll('.tb-btn');
+  btns.forEach(b=>{if(b.textContent.toLowerCase()===id) b.classList.add('active')});
+  if(id==='terminal') setTimeout(()=>document.getElementById('t-input').focus(),100);
+}
+
+// ═══════════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════════
+function toggleSetting(key,el){
+  el.classList.toggle('on');
+  if(key==='stars'){starsEnabled=el.classList.contains('on')}
+  if(key==='perf'){
+    const on=el.classList.contains('on');
+    document.body.style.setProperty('--anim-dur',on?'0':'1');
+  }
+}
+function setTheme(name,btn){
+  document.body.className=name==='default'?'':'theme-'+name;
+  if(btn){
+    document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONTEXT MENU
+// ═══════════════════════════════════════════════════════
+document.addEventListener('contextmenu',e=>{
+  e.preventDefault();
+  const m=document.getElementById('ctx-menu');
+  m.style.display='block';
+  m.style.left=Math.min(e.clientX,window.innerWidth-170)+'px';
+  m.style.top=Math.min(e.clientY,window.innerHeight-180)+'px';
+});
+document.addEventListener('click',hideCtx);
+function hideCtx(){document.getElementById('ctx-menu').style.display='none'}
+
+// ═══════════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ═══════════════════════════════════════════════════════
+function showNotif(title,msg,dur=4000){
+  const n=document.getElementById('notif');
+  document.getElementById('notif-title').textContent=title;
+  document.getElementById('notif-msg').textContent=msg;
+  n.style.display='block';
+  setTimeout(()=>{n.style.opacity='0';n.style.transition='opacity 0.5s';setTimeout(()=>{n.style.display='none';n.style.opacity='1';n.style.transition=''},500)},dur);
+}
+
+// ═══════════════════════════════════════════════════════
+//  EASTER EGGS
+// ═══════════════════════════════════════════════════════
+let konamiSeq=[], konamiCode=[38,38,40,40,37,39,37,39,66,65];
+document.addEventListener('keydown',e=>{
+  konamiSeq.push(e.keyCode);
+  if(konamiSeq.length>10) konamiSeq.shift();
+  if(JSON.stringify(konamiSeq)===JSON.stringify(konamiCode)) activateEasterEgg();
+});
+function activateEasterEgg(){
+  // Spawn a burst of shooting stars
+  for(let i=0;i<20;i++){
+    setTimeout(()=>shooters.push(mkShooter()),i*80);
+  }
+  showNotif('🎉 Easter Egg!','You found the secret! Konami Code activated — enjoy the light show!',5000);
+  // Glitch effect
+  document.body.style.filter='invert(1)';
+  setTimeout(()=>{document.body.style.filter='hue-rotate(90deg)'},300);
+  setTimeout(()=>{document.body.style.filter='invert(1)'},600);
+  setTimeout(()=>{document.body.style.filter=''},900);
+}
+
+// ═══════════════════════════════════════════════════════
+//  START
+// ═══════════════════════════════════════════════════════
+runBoot();
+</script>
 </body>
 </html>
